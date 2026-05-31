@@ -1,11 +1,4 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=APP2APK+logo+text+with+Android+robot+and+web+code+symbol+minimalist+tech+style+blue+cyan+color+schema&image_size=landscape_16_9">
-    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=APP2APK+logo+text+with+Android+robot+and+web+code+symbol+minimalist+tech+style+blue+cyan+color+schema&image_size=landscape_16_9" width="100%" alt="APP2APK Banner" />
-  </picture>
-</p>
-
-<p align="center">
   <strong>将 AI 生成的网页代码一键打包为 Android APK 应用</strong>
 </p>
 
@@ -18,13 +11,23 @@
   <img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License" />
 </p>
 
+## Star History
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=sdlw7757/app2apk&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=sdlw7757/app2apk&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=sdlw7757/app2apk&type=Date" width="80%" />
+  </picture>
+</p>
+
 ---
 
 > **⚠️ 重要提示：构建工具链已从仓库中移除**
 >
 > 为减小仓库体积，`tools/jdk/`、`tools/gradle-8.9/`、`tools/android-sdk/` 等大型构建工具已不再包含在代码仓库中。
 >
-> **首次运行 `启动服务器.bat` 并提交构建任务时，服务器会自动检测并下载所需工具链（约 3-5GB），下载源为国内华为云镜像。**
+> **首次运行 `启动服务器.bat` 并提交构建任务时，服务器会自动检测并下载所需工具链（约 3-5GB），下载源为国内镜像（华为云、腾讯云、阿里云等多路备用）。**
 >
 > 下载完成后，工具将自动放置到 `tools/` 目录下，后续使用无需重复下载。
 
@@ -112,7 +115,7 @@ app2apk/
 
 1. **用户通过 Web 界面** 提交 HTML/JS 代码、应用名称、版本、权限和图标
 2. **Python 服务器** 接收请求，创建唯一任务 ID，将代码写入 Android 项目模板
-3. **服务器自动查找或下载** JDK 17、Gradle 8.9、Android SDK 34（工具链已内置）
+3. **服务器自动查找或下载** JDK 17、Gradle 8.9、Android SDK 34（工具链自动下载）
 4. **Gradle 编译流水线** 执行 `assembleDebug`，将 Web 代码编译为 APK
 5. **构建完成后** 用户可通过浏览器直接下载 APK 安装包
 
@@ -252,7 +255,7 @@ GET /api/tools/status
 - **启动页**：Android SplashScreen API
 - **返回键**：支持 WebView 内历史导航
 
-模板位于 [android-template](file:///c:/Users/Administrator/Desktop/demo2apk/android-template) 目录，你可以根据需求修改：
+模板位于 [android-template](android-template) 目录，你可以根据需求修改：
 
 - `build.gradle` — 调整编译 SDK 版本、依赖库
 - `AndroidManifest.xml` — 添加 Activity、Service、权限
@@ -262,7 +265,7 @@ GET /api/tools/status
 
 ## 使用 PyInstaller 打包
 
-项目提供了 [APP2APK-Builder.spec](file:///c:/Users/Administrator/Desktop/demo2apk/APP2APK-Builder.spec) 文件，可将 server.py 和 index.html 打包为独立的 Windows 可执行文件：
+项目提供了 [APP2APK-Builder.spec](APP2APK-Builder.spec) 文件，可将 server.py 和 index.html 打包为独立的 Windows 可执行文件：
 
 ```bash
 pip install pyinstaller
@@ -282,7 +285,7 @@ pyinstaller APP2APK-Builder.spec
 1. **环境变量**：`JAVA_HOME`、`GRADLE_HOME`、`ANDROID_HOME` / `ANDROID_SDK_ROOT`
 2. **内置目录**：`tools/jdk/`、`tools/gradle-8.9/`、`tools/android-sdk/`（需提前下载）
 3. **系统路径**：常见 JDK 安装位置（如 `C:\Program Files\Java\`）
-4. **自动下载**：如未找到，从华为云镜像自动下载
+4. **自动下载**：如未找到，从国内镜像自动下载（华为云、腾讯云、阿里云等多路备用）
 
 ### 构建优化
 
@@ -312,15 +315,6 @@ A：不支持。本项目专注于 Android APK 构建。iOS 需要 Xcode 和 App
 A：在 Web 界面上传 Base64 编码的 PNG 图片（建议 72×72 或更大），或直接替换模板中的 `mipmap-hdpi/ic_launcher.png`。
 
 ---
-
-## Star 历史
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=GitHub+star+history+chart+showing+growth+curve+of+open+source+project+with+stars+going+upward+dark+theme+cyan+blue+neon+glow&image_size=landscape_16_9">
-    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=GitHub+star+history+chart+showing+growth+curve+of+open+source+project+with+stars+going+upward+dark+theme+cyan+blue+neon+glow&image_size=landscape_16_9" width="80%" alt="Star History Chart" />
-  </picture>
-</p>
 
 ---
 
