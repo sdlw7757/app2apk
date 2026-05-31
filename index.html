@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APP2APK - 将 AI 演示转化为安卓应用 | HTML/React 转 APK</title>
+<meta name="description" content="专为 AI 编程打造。将 Gemini、ChatGPT、DeepSeek 等 AI 生成的代码一键打包成安卓 App。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bp-dark:#050b14;--bp-panel:#0a1625;--bp-grid:#1a2634;--bp-blue:#00f0ff;--bp-cyan:#00ff9d;--bp-alert:#ff9900;--bp-warning:#ffcc00;--bp-text:#e0f7ff;--bp-dim:#5c7c8a;--bp-purple:#a855f7;--bp-orange:#f97316;--bp-green:#22c55e;}
+body{font-family:'JetBrains Mono','Share Tech Mono',monospace;background:var(--bp-dark);color:var(--bp-text);min-height:100vh;overflow-x:hidden;background-image:linear-gradient(rgba(26,38,52,0.4) 1px,transparent 1px),linear-gradient(90deg,rgba(26,38,52,0.4) 1px,transparent 1px);background-size:20px 20px;}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(0,240,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.05) 1px,transparent 1px);background-size:100px 100px;pointer-events:none;z-index:-1;}
+.container{width:100%;max-width:1120px;margin:0 auto;padding:16px;position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.bg-glow{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(0,240,255,0.05) 0%, transparent 70%);opacity:.5;z-index:0;}
+.tech-line-top{position:fixed;top:32px;left:32px;right:32px;height:1px;background:rgba(0,240,255,0.2);pointer-events:none;display:none;}
+.tech-line-top::before{content:'';position:absolute;top:-3px;left:0;width:100px;height:1px;background:rgba(0,240,255,0.5);}
+.tech-line-top::after{content:'';position:absolute;top:-3px;right:0;width:100px;height:1px;background:rgba(0,240,255,0.5);}
+.tech-line-bottom{position:fixed;bottom:32px;left:32px;right:32px;height:1px;background:rgba(0,240,255,0.2);pointer-events:none;display:none;}
+.tech-line-left{position:fixed;top:32px;bottom:32px;left:32px;width:1px;background:rgba(0,240,255,0.2);pointer-events:none;display:none;}
+.tech-line-right{position:fixed;top:32px;bottom:32px;right:32px;width:1px;background:rgba(0,240,255,0.2);pointer-events:none;display:none;}
+@media(min-width:768px){.tech-line-top,.tech-line-bottom,.tech-line-left,.tech-line-right{display:block;}}
+.main-wrap{width:100%;max-width:1120px;}
+.blueprint-box{position:relative;border:1px solid rgba(0,240,255,0.3);background:rgba(10,22,37,0.8);backdrop-filter:blur(4px);box-shadow:0 0 0 1px rgba(0,240,255,0.05);}
+.blueprint-box.border-t-0{border-top:0;}
+.scanline{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,240,255,0.05) 0%,transparent 100%);height:10px;width:100%;pointer-events:none;opacity:.3;animation:scanline 4s linear infinite;}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+.crosshair{position:absolute;width:16px;height:16px;}
+.crosshair-tl{top:16px;left:16px;border-top:1px solid rgba(0,240,255,0.5);border-left:1px solid rgba(0,240,255,0.5);}
+.crosshair-tr{top:16px;right:16px;border-top:1px solid rgba(0,240,255,0.5);border-right:1px solid rgba(0,240,255,0.5);}
+.crosshair-bl{bottom:16px;left:16px;border-bottom:1px solid rgba(0,240,255,0.5);border-left:1px solid rgba(0,240,255,0.5);}
+.crosshair-br{bottom:16px;right:16px;border-bottom:1px solid rgba(0,240,255,0.5);border-right:1px solid rgba(0,240,255,0.5);}
+.corner{position:absolute;width:8px;height:8px;}
+.corner::before{content:'';position:absolute;width:8px;height:8px;border-color:inherit;border-style:solid;}
+.corner-tl{top:-1px;left:-1px;}.corner-tl::before{border-top:1px solid;border-left:1px solid;border-right:none;border-bottom:none;}
+.corner-tr{top:-1px;right:-1px;}.corner-tr::before{border-top:1px solid;border-right:1px solid;border-left:none;border-bottom:none;}
+.corner-bl{bottom:-1px;left:-1px;}.corner-bl::before{border-bottom:1px solid;border-left:1px solid;border-top:none;border-right:none;}
+.corner-br{bottom:-1px;right:-1px;}.corner-br::before{border-bottom:1px solid;border-right:1px solid;border-top:none;border-left:none;}
+.corner-blue{border-color:rgba(0,240,255,0.5);}
+.corner-cyan{border-color:rgba(0,255,157,0.5);}
+.corner-orange{border-color:rgba(249,115,22,0.5);}
+.corner-purple{border-color:rgba(168,85,247,0.5);}
+.corner-green{border-color:rgba(34,197,94,0.5);}
+.corner-amber{border-color:rgba(251,191,36,0.5);}
+.corner-violet{border-color:rgb(139,92,246);}
+.corner-red{border-color:rgba(239,68,68,0.5);}
+.corner-amber-2{border-color:rgba(251,191,36,0.5);}
+.ruler-x{height:8px;width:100%;border-bottom:1px solid var(--bp-grid);background-image:linear-gradient(90deg,rgba(0,240,255,0.3) 1px,transparent 1px);background-size:10px 100%;}
+.btn-tech{position:relative;padding:12px 24px;font-family:'Share Tech Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .3s;border:1px solid rgba(0,240,255,0.5);color:var(--bp-blue);background:transparent;}
+.btn-tech:hover{background:rgba(0,240,255,0.1);box-shadow:0 0 10px rgba(0,240,255,0.3),0 0 20px rgba(0,240,255,0.1);}
+.btn-primary{background:rgba(0,240,255,0.1);border-color:var(--bp-blue);color:var(--bp-blue);}
+.btn-primary:hover{background:var(--bp-blue);color:var(--bp-dark);}
+.btn-secondary{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.4);color:#22c55e;}
+.btn-secondary:hover{background:rgba(34,197,94,0.18);border-color:#22c55e;}
+.btn-amber{border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.05);color:#f59e0b;}
+.btn-amber:hover{background:rgba(251,191,36,0.1);border-color:#f59e0b;}
+/* Header */
+.header{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,240,255,0.3);position:relative;}
+.header::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:rgba(0,240,255,0.5);}
+.header-left{display:flex;align-items:center;gap:16px;}
+.logo{width:56px;height:56px;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.logo svg{width:100%;height:100%;}
+.header-title h1{font-size:28px;font-weight:700;color:var(--bp-text);letter-spacing:.15em;font-family:'Share Tech Mono',monospace;}
+.header-title h1 span{color:var(--bp-blue);}
+.header-sub{display:flex;align-items:center;gap:16px;font-size:12px;color:rgba(0,240,255,0.6);margin-top:4px;}
+.header-right{display:flex;align-items:center;gap:16px;}
+.lang-switch{display:flex;border:1px solid var(--bp-grid);border-radius:2px;overflow:hidden;background:rgba(5,11,20,0.6);}
+.lang-btn{padding:4px 12px;font-size:11px;font-family:'JetBrains Mono',monospace;cursor:pointer;border:none;background:transparent;color:var(--bp-dim);transition:all .2s;text-transform:uppercase;letter-spacing:.1em;}
+.lang-btn.active{background:rgba(0,240,255,0.2);color:var(--bp-blue);box-shadow:0 0 10px rgba(0,240,255,0.3);}
+.lang-btn+.lang-btn{border-left:1px solid rgba(26,38,52,0.4);}
+.lang-btn:hover{color:rgba(0,240,255,0.7);}
+.github-star{display:flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--bp-grid);background:rgba(5,11,20,0.5);cursor:pointer;transition:all .3s;position:relative;text-decoration:none;color:inherit;}
+.github-star:hover{border-color:#f59e0b;background:rgba(251,191,36,0.1);}
+.github-star .corner{opacity:0;transition:opacity .3s;}
+.github-star:hover .corner{opacity:1;}
+.star-icon{width:16px;height:16px;color:#f59e0b;}
+.star-count{font-size:12px;color:var(--bp-dim);}
+.github-star:hover .star-count{color:#f59e0b;}
+.github-star:hover .gt-hide{color:#fff;}
+.star-cta{font-size:11px;color:var(--bp-dim);text-transform:uppercase;letter-spacing:.05em;display:none;}
+@media(min-width:768px){.star-cta{display:block;}.github-star:hover .star-cta{color:#f59e0b;}}
+/* Footer */
+.footer{margin-top:16px;display:flex;flex-direction:column;gap:8px;justify-content:space-between;align-items:center;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--bp-dim);text-transform:uppercase;letter-spacing:.1em;}
+@media(min-width:768px){.footer{flex-direction:row;font-size:12px;}}
+.footer-left{display:flex;align-items:center;gap:16px;width:100%;justify-content:space-between;}
+@media(min-width:768px){.footer-left{width:auto;justify-content:flex-start;}}
+.footer-left .status{color:var(--bp-blue);}
+.status-dot{width:8px;height:8px;background:var(--bp-cyan);border-radius:50%;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;}
+.footer-right{display:flex;gap:16px;width:100%;justify-content:space-between;}
+@media(min-width:768px){.footer-right{width:auto;justify-content:flex-start;}}
+/* Guide Section */
+.guide-section{margin-bottom:24px;border:1px solid rgba(0,240,255,0.3);background:rgba(5,11,20,0.5);overflow:hidden;position:relative;}
+.guide-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(0,240,255,0.05);border:none;border-bottom:1px solid rgba(0,240,255,0.2);cursor:pointer;color:inherit;font-family:inherit;transition:background .3s;}
+.guide-toggle:hover{background:rgba(0,240,255,0.1);}
+.guide-toggle-left{display:flex;align-items:center;gap:8px;}
+.guide-toggle-left .icon{font-size:20px;color:var(--bp-cyan);}
+.guide-toggle-left .title{font-family:'Share Tech Mono',monospace;color:var(--bp-text);text-transform:uppercase;letter-spacing:.05em;font-size:14px;}
+@media(min-width:768px){.guide-toggle-left .title{font-size:16px;}}
+.guide-toggle-right{display:flex;align-items:center;gap:8px;color:var(--bp-dim);font-size:11px;}
+.guide-toggle-right .arrow{transition:transform .3s;}
+.guide-toggle-right .arrow.open{transform:rotate(180deg);}
+.guide-content{transition:max-height .3s ease-in-out,opacity .3s ease-in-out;overflow:hidden;max-height:0;opacity:0;}
+.guide-content.open{max-height:600px;opacity:1;}
+.guide-grid{display:grid;grid-template-columns:1fr;gap:16px;padding:24px;}
+@media(min-width:768px){.guide-grid{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:1024px){.guide-grid{grid-template-columns:repeat(4,1fr);}}
+.guide-intro{grid-column:1/-1;text-align:center;margin-bottom:8px;}
+.guide-intro p{font-size:14px;color:var(--bp-text);}
+.guide-card{background:var(--bp-dark);border:1px solid var(--bp-grid);padding:16px;position:relative;transition:border-color .3s;}
+.guide-card:hover{border-color:rgba(0,240,255,0.5);}
+.guide-card-header{display:flex;justify-content:space-between;align-items:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(0,240,255,0.2);padding-bottom:4px;margin-bottom:8px;}
+.guide-card-desc{font-size:12px;color:var(--bp-dim);line-height:1.6;}
+.guide-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.guide-tag{display:inline-block;padding:2px 6px;font-size:10px;border:1px solid;}
+/* Content Area */
+.content{padding:16px;}
+@media(min-width:768px){.content{padding:48px;}}
+/* Parameters Grid */
+.params-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:32px;}
+@media(min-width:768px){.params-grid{grid-template-columns:2fr 1fr 1fr;gap:24px;}}
+.param-group{position:relative;}
+.param-label{position:absolute;top:-12px;left:16px;background:rgba(10,22,37,0.8);padding:0 8px;font-size:10px;color:var(--bp-blue);z-index:10;}
+@media(min-width:768px){.param-label{font-size:12px;}}
+.param-label.purple{color:var(--bp-purple);}
+.param-label.orange{color:var(--bp-orange);}
+.app-name-input{position:relative;}
+.app-name-input .c{position:absolute;width:8px;height:8px;}
+.app-name-input .c-tl{top:0;left:0;border-top:1px solid rgba(0,240,255,0.5);border-left:1px solid rgba(0,240,255,0.5);}
+.app-name-input .c-tr{top:0;right:0;border-top:1px solid rgba(0,240,255,0.5);border-right:1px solid rgba(0,240,255,0.5);}
+.app-name-input .c-bl{bottom:0;left:0;border-bottom:1px solid rgba(0,240,255,0.5);border-left:1px solid rgba(0,240,255,0.5);}
+.app-name-input .c-br{bottom:0;right:0;border-bottom:1px solid rgba(0,240,255,0.5);border-right:1px solid rgba(0,240,255,0.5);}
+.app-name-flex{display:flex;}
+.app-name-auto{width:100%;background:rgba(0,240,255,0.1);border:1px solid var(--bp-blue);padding:16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--bp-blue);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .3s;height:72px;min-height:60px;}
+@media(max-width:767px){.app-name-auto{font-size:14px;padding:12px;height:60px;}}
+.app-name-auto:hover{background:rgba(0,240,255,0.2);}
+.app-name-auto .switch-text{font-size:10px;text-transform:uppercase;letter-spacing:.02em;display:flex;align-items:center;gap:8px;opacity:0;transition:opacity .3s;}
+.app-name-auto:hover .switch-text{opacity:1;}
+@media(max-width:767px){.app-name-auto .switch-text{opacity:1;font-size:9px;}.app-name-auto .switch-text .hide-mobile{display:none;}}
+.app-name-custom{flex:1;background:rgba(5,11,20,0.5);border:1px solid rgba(34,197,94,0.5);padding:16px;font-family:'JetBrains Mono',monospace;font-size:16px;color:#4ade80;height:72px;min-height:60px;outline:none;transition:all .3s;}
+@media(max-width:767px){.app-name-custom{font-size:14px;padding:12px;height:60px;}}
+.app-name-custom:focus{border-color:#22c55e;background:rgba(34,197,94,0.05);}
+.app-name-custom::placeholder{color:rgba(34,197,94,0.3);}
+.app-name-toggle{padding:0 16px;border:1px solid rgba(34,197,94,0.5);border-left:0;background:rgba(34,197,94,0.1);color:#22c55e;cursor:pointer;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:background .3s;white-space:nowrap;}
+.app-name-toggle:hover{background:rgba(34,197,94,0.2);}
+.app-name-toggle svg{width:14px;height:14px;}
+.param-helper{font-size:9px;margin-top:4px;display:flex;justify-content:space-between;}
+@media(min-width:768px){.param-helper{font-size:10px;margin-top:8px;}}
+.param-helper .edit-link{color:var(--bp-blue);cursor:pointer;}
+.param-helper .edit-link:hover{text-decoration:underline;}
+.version-input-wrap{position:relative;border:1px solid var(--bp-grid);transition:border-color .3s;}
+.version-input-wrap:hover{border-color:rgba(168,85,247,0.5);}
+.version-input-wrap .c{position:absolute;width:8px;height:8px;}
+.version-input-wrap .c-tl{top:0;left:0;border-top:1px solid rgba(168,85,247,0.5);border-left:1px solid rgba(168,85,247,0.5);}
+.version-input-wrap .c-tr{top:0;right:0;border-top:1px solid rgba(168,85,247,0.5);border-right:1px solid rgba(168,85,247,0.5);}
+.version-input-wrap .c-bl{bottom:0;left:0;border-bottom:1px solid rgba(168,85,247,0.5);border-left:1px solid rgba(168,85,247,0.5);}
+.version-input-wrap .c-br{bottom:0;right:0;border-bottom:1px solid rgba(168,85,247,0.5);border-right:1px solid rgba(168,85,247,0.5);}
+.version-input-wrap.error{border-color:rgba(239,68,68,0.5);}
+.version-input-wrap.error .c-tl,.version-input-wrap.error .c-tr,.version-input-wrap.error .c-bl,.version-input-wrap.error .c-br{border-color:rgba(239,68,68,0.5);}
+.version-input{width:100%;background:rgba(5,11,20,0.5);padding:16px;font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--bp-purple);height:72px;min-height:60px;outline:none;border:none;transition:all .3s;}
+@media(max-width:767px){.version-input{font-size:14px;padding:12px;height:60px;}}
+.version-input:focus{background:rgba(168,85,247,0.05);}
+.version-input::placeholder{color:rgba(168,85,247,0.3);}
+.version-input.error{color:#f87171;}
+.version-helper{font-size:9px;text-align:right;height:16px;}
+@media(min-width:768px){.version-helper{font-size:10px;}}
+.version-helper .error-text{color:#f87171;}
+/* Icon Upload */
+.icon-upload-wrap{position:relative;border:1px solid var(--bp-grid);transition:border-color .3s;height:72px;min-height:60px;}
+@media(max-width:767px){.icon-upload-wrap{height:60px;}}
+.icon-upload-wrap:hover{border-color:rgba(249,115,22,0.5);}
+.icon-upload-wrap .c{position:absolute;width:8px;height:8px;}
+.icon-upload-wrap .c-tl{top:0;left:0;border-top:1px solid rgba(249,115,22,0.5);border-left:1px solid rgba(249,115,22,0.5);}
+.icon-upload-wrap .c-tr{top:0;right:0;border-top:1px solid rgba(249,115,22,0.5);border-right:1px solid rgba(249,115,22,0.5);}
+.icon-upload-wrap .c-bl{bottom:0;left:0;border-bottom:1px solid rgba(249,115,22,0.5);border-left:1px solid rgba(249,115,22,0.5);}
+.icon-upload-wrap .c-br{bottom:0;right:0;border-bottom:1px solid rgba(249,115,22,0.5);border-right:1px solid rgba(249,115,22,0.5);}
+.icon-upload-btn{display:none;}
+.icon-label{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;transition:background .3s;height:100%;}
+.icon-label:hover{background:rgba(249,115,22,0.05);}
+.icon-box{width:40px;height:40px;border:1px dashed var(--bp-dim);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--bp-dim);flex-shrink:0;transition:all .3s;}
+.icon-label:hover .icon-box{border-color:rgba(249,115,22,0.5);color:rgba(249,115,22,0.7);}
+.icon-box svg{width:20px;height:20px;}
+.icon-text{font-size:10px;color:var(--bp-dim);transition:color .3s;}
+@media(min-width:768px){.icon-text{font-size:12px;}}
+.icon-label:hover .icon-text{color:rgba(249,115,22,0.7);}
+.icon-preview{display:flex;align-items:center;gap:8px;padding:8px 12px;height:100%;}
+.icon-preview-img{width:40px;height:40px;object-fit:contain;border-radius:4px;border:1px solid var(--bp-grid);}
+.icon-preview-info{flex:1;min-width:0;}
+.icon-preview-name{font-size:10px;color:var(--bp-orange);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media(min-width:768px){.icon-preview-name{font-size:12px;}}
+.icon-preview-size{font-size:9px;color:var(--bp-dim);}
+.icon-remove{padding:4px;color:var(--bp-dim);cursor:pointer;background:none;border:none;transition:all .3s;}
+.icon-remove:hover{color:#f87171;background:rgba(248,113,113,0.1);}
+.icon-helper{font-size:9px;text-align:right;height:16px;}
+@media(min-width:768px){.icon-helper{font-size:10px;}}
+/* Permissions */
+.permissions-wrap{padding:16px 20px;margin-bottom:16px;}
+@media(min-width:768px){.permissions-wrap{padding:20px;}}
+.permissions-header{display:flex;flex-direction:column;gap:12px;}
+@media(min-width:768px){.permissions-header{flex-direction:row;align-items:center;justify-content:space-between;}}
+.permissions-toggle{display:flex;align-items:center;gap:8px;color:var(--bp-dim);font-size:11px;cursor:pointer;background:none;border:none;font-family:inherit;transition:color .3s;}
+.permissions-toggle:hover{color:var(--bp-text);}
+.permissions-count{padding:2px 6px;border:1px solid var(--bp-grid);background:rgba(5,11,20,0.5);color:rgba(0,240,255,0.8);font-size:10px;}
+.permissions-actions{display:flex;align-items:center;gap:16px;font-size:10px;color:var(--bp-dim);}
+@media(min-width:768px){.permissions-actions{font-size:12px;gap:24px;}}
+.permissions-action{background:none;border:none;color:var(--bp-dim);font-family:inherit;font-size:inherit;cursor:pointer;transition:color .3s;}
+.permissions-action:hover{color:var(--bp-text);}
+.permissions-info{font-size:10px;color:var(--bp-dim);margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+@media(min-width:768px){.permissions-info{font-size:12px;flex-direction:row;align-items:center;justify-content:space-between;}}
+.permissions-danger{color:rgba(255,153,0,0.8);}
+.permissions-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:16px;}
+@media(min-width:768px){.permissions-grid{grid-template-columns:repeat(2,1fr);gap:16px;}}
+.permission-category{border:1px solid rgba(26,38,52,0.5);background:rgba(10,22,37,0.2);padding:12px;position:relative;}
+.permission-category .corner{border-color:rgba(26,38,52,0.7);}
+.permission-cat-title{font-size:10px;color:rgba(224,247,255,0.8);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+@media(min-width:768px){.permission-cat-title{font-size:12px;}}
+.permission-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;cursor:pointer;}
+.permission-item input{margin-top:3px;accent-color:var(--bp-blue);}
+.permission-item-label{font-size:12px;color:var(--bp-text);}
+@media(min-width:768px){.permission-item-label{font-size:14px;}}
+.permission-item-desc{font-size:10px;color:var(--bp-dim);}
+/* PWA Toggle */
+.pwa-toggle{margin-bottom:16px;position:relative;}
+.pwa-toggle .c{position:absolute;width:8px;height:8px;}
+.pwa-toggle .c-tl{top:0;left:0;border-top:1px solid rgba(0,255,157,0.5);border-left:1px solid rgba(0,255,157,0.5);}
+.pwa-toggle .c-tr{top:0;right:0;border-top:1px solid rgba(0,255,157,0.5);border-right:1px solid rgba(0,255,157,0.5);}
+.pwa-toggle .c-bl{bottom:0;left:0;border-bottom:1px solid rgba(0,255,157,0.5);border-left:1px solid rgba(0,255,157,0.5);}
+.pwa-toggle .c-br{bottom:0;right:0;border-bottom:1px solid rgba(0,255,157,0.5);border-right:1px solid rgba(0,255,157,0.5);}
+.pwa-label{position:absolute;top:-12px;left:16px;background:rgba(10,22,37,0.8);padding:0 8px;font-size:10px;color:var(--bp-cyan);z-index:10;}
+@media(min-width:768px){.pwa-label{font-size:12px;}}
+.pwa-content{padding:16px;border:1px solid var(--bp-grid);transition:border-color .3s;}
+.pwa-content:hover{border-color:rgba(0,255,157,0.5);}
+.pwa-checkbox{display:flex;align-items:center;gap:12px;cursor:pointer;}
+.toggle-switch{position:relative;width:40px;height:20px;background:var(--bp-dark);border:1px solid var(--bp-grid);border-radius:999px;transition:all .3s;}
+.toggle-switch.active{border-color:var(--bp-cyan);background:rgba(0,255,157,0.2);}
+.toggle-dot{position:absolute;left:2px;top:2px;width:14px;height:14px;background:var(--bp-dim);border-radius:50%;transition:all .3s;}
+.toggle-switch.active .toggle-dot{transform:translateX(20px);background:var(--bp-cyan);}
+.pwa-text{font-size:12px;color:var(--bp-text);}
+@media(min-width:768px){.pwa-text{font-size:14px;}}
+.pwa-hint{font-size:10px;color:var(--bp-dim);margin-top:2px;}
+/* Section Divider */
+.section-divider{display:flex;align-items:center;justify-content:space-between;padding-top:16px;margin-bottom:8px;border-top:1px solid rgba(26,38,52,0.3);}
+.section-title{font-size:10px;color:rgba(0,240,255,0.7);}
+@media(min-width:768px){.section-title{font-size:12px;}}
+/* Mode Tabs */
+.mode-tabs{display:flex;flex-direction:column;gap:4px;}
+@media(min-width:768px){.mode-tabs{flex-direction:row;gap:0;}}
+.mode-tab{flex:1;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border:none;cursor:pointer;transition:all .3s;position:relative;text-align:center;}
+@media(min-width:768px){.mode-tab{padding:12px 16px;font-size:14px;border:1px solid transparent;border-top:1px solid;border-left:1px solid;border-right:1px solid;}}
+.mode-tab.active{background:rgba(0,240,255,0.1);color:var(--bp-blue);}
+.mode-tab.active::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:var(--bp-blue);}
+@media(max-width:767px){.mode-tab.active::before{width:2px;height:100%;}}
+.mode-tab.paste.active{background:rgba(0,255,157,0.1);color:var(--bp-cyan);}
+.mode-tab.paste.active::before{background:var(--bp-cyan);}
+.mode-tab:not(.active){background:rgba(26,38,52,0.1);color:var(--bp-dim);}
+.mode-tab:not(.active):hover{color:rgba(0,240,255,0.7);background:rgba(26,38,52,0.2);}
+@media(min-width:768px){.mode-tab:not(.active){background:transparent;}}
+.mode-desc{padding:8px 4px;font-size:10px;color:var(--bp-dim);}
+@media(min-width:768px){.mode-desc{font-size:12px;}}
+/* Upload Zone */
+.upload-zone{position:relative;height:192px;border:1px dashed var(--bp-grid);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;background:rgba(5,11,20,0.5);}
+@media(min-width:768px){.upload-zone{height:256px;}}
+.upload-zone.dragover{border-color:var(--bp-blue);background:rgba(0,240,255,0.05);box-shadow:0 0 10px rgba(0,240,255,0.3),0 0 20px rgba(0,240,255,0.1);}
+.upload-zone:hover{border-color:rgba(0,240,255,0.5);background:rgba(0,240,255,0.05);}
+.upload-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(to right,rgba(26,38,52,0.5) 1px,transparent 1px),linear-gradient(to bottom,rgba(26,38,52,0.5) 1px,transparent 1px);background-size:20px 20px;opacity:.2;pointer-events:none;}
+.upload-corner{position:absolute;width:8px;height:8px;border-color:var(--bp-blue);transition:all .3s;}
+.upload-zone:hover .upload-corner{width:16px;height:16px;}
+.upload-corner-tl{top:0;left:0;border-top:1px solid;border-left:1px solid;}
+.upload-corner-tr{top:0;right:0;border-top:1px solid;border-right:1px solid;}
+.upload-corner-bl{bottom:0;left:0;border-bottom:1px solid;border-left:1px solid;}
+.upload-corner-br{bottom:0;right:0;border-bottom:1px solid;border-right:1px solid;}
+.upload-icon{font-size:40px;transition:all .3s;margin-bottom:8px;}
+@media(min-width:768px){.upload-icon{font-size:48px;}}
+.upload-zone.dragover .upload-icon{color:var(--bp-blue);transform:scale(1.1);}
+.upload-zone:not(.dragover) .upload-icon{color:var(--bp-dim);}
+.upload-zone:hover .upload-icon{color:var(--bp-blue);}
+.upload-text{font-size:16px;font-family:'Share Tech Mono',monospace;letter-spacing:.05em;text-transform:uppercase;}
+@media(min-width:768px){.upload-text{font-size:20px;}}
+.upload-zone.dragover .upload-text{color:var(--bp-blue);}
+.upload-zone:not(.dragover) .upload-text{color:var(--bp-text);}
+.upload-zone:hover .upload-text{color:var(--bp-blue);}
+.upload-sub{font-size:10px;color:var(--bp-dim);margin-top:4px;}
+@media(min-width:768px){.upload-sub{font-size:12px;margin-top:8px;}}
+.upload-spec{position:absolute;bottom:16px;right:16px;font-size:10px;color:var(--bp-dim);background:var(--bp-dark);padding:0 8px;border:1px solid var(--bp-grid);}
+/* Paste Code Area */
+.paste-area{display:flex;flex-direction:column;gap:12px;}
+@media(min-width:768px){.paste-area{gap:16px;}}
+.paste-textarea-wrap{position:relative;}
+.paste-textarea-wrap .c{position:absolute;width:12px;height:12px;z-index:10;border-color:var(--bp-cyan);border-style:solid;}
+.paste-textarea-wrap .c-tl{top:0;left:0;border-top:1px solid;border-left:1px solid;}
+.paste-textarea-wrap .c-tr{top:0;right:0;border-top:1px solid;border-right:1px solid;}
+.paste-textarea-wrap .c-bl{bottom:0;left:0;border-bottom:1px solid;border-left:1px solid;}
+.paste-textarea-wrap .c-br{bottom:0;right:0;border-bottom:1px solid;border-right:1px solid;}
+.paste-textarea{width:100%;height:192px;background:rgba(5,11,20,0.7);border:1px solid var(--bp-grid);padding:12px 16px;color:var(--bp-text);font-family:'JetBrains Mono',monospace;font-size:12px;resize:none;outline:none;transition:all .3s;}
+@media(min-width:768px){.paste-textarea{height:256px;font-size:14px;padding:16px;}}
+.paste-textarea:focus{border-color:var(--bp-cyan);background:rgba(0,255,157,0.05);}
+.paste-textarea::placeholder{color:rgba(92,124,138,0.4);}
+.paste-submit{width:100%;padding:12px 16px;font-family:'Share Tech Mono',monospace;font-size:16px;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--bp-grid);background:transparent;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+@media(min-width:768px){.paste-submit{font-size:20px;padding:16px;}}
+.paste-submit.active{border-color:var(--bp-cyan);color:var(--bp-cyan);}
+.paste-submit.active:hover{background:var(--bp-cyan);color:var(--bp-dark);}
+.paste-submit:disabled{border-color:var(--bp-grid);color:var(--bp-dim);cursor:not-allowed;}
+.paste-submit .gradient-bg{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,157,0.1),transparent);transform:translateX(-100%);transition:transform 1s;}
+.paste-submit.active:hover .gradient-bg{transform:translateX(100%);}
+.paste-info{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--bp-dim);}
+.paste-badge{padding:2px 6px;font-size:10px;border:1px solid;border-radius:2px;text-transform:uppercase;letter-spacing:.05em;}
+/* Info Boxes */
+.info-box{position:relative;border:1px solid;padding:12px 16px;margin-bottom:16px;}
+@media(min-width:768px){.info-box{padding:16px;}}
+.info-box .c{position:absolute;width:8px;height:8px;border-style:solid;}
+.info-box .c-tl{top:0;left:0;border-top:1px solid;border-left:1px solid;}
+.info-box .c-tr{top:0;right:0;border-top:1px solid;border-right:1px solid;}
+.info-box .c-bl{bottom:0;left:0;border-bottom:1px solid;border-left:1px solid;}
+.info-box .c-br{bottom:0;right:0;border-bottom:1px solid;border-right:1px solid;}
+.info-box-content{display:flex;align-items:flex-start;gap:8px;font-size:12px;}
+.info-box-content .icon{font-size:16px;flex-shrink:0;}
+/* Build Progress */
+.progress-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.progress-status-text{font-size:12px;color:rgba(0,240,255,0.7);animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;}
+.progress-status-text.queued-text{color:var(--bp-warning);}
+.queue-banner{border:1px solid rgba(255,204,0,0.5);background:rgba(255,204,0,0.1);padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.queue-banner .icon{font-size:24px;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;color:var(--bp-warning);}
+.queue-banner .title{color:var(--bp-warning);font-size:14px;font-weight:700;}
+.queue-banner .desc{color:var(--bp-dim);font-size:12px;margin-top:4px;}
+.task-info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;font-size:12px;}
+.task-info-item{border:1px solid var(--bp-grid);padding:8px;display:flex;justify-content:space-between;align-items:center;background:rgba(5,11,20,0.3);}
+.task-info-item .label{color:var(--bp-dim);}
+.task-info-item .value{color:var(--bp-text);}
+.task-info-item .value.hash{color:var(--bp-blue);user-select:all;}
+.progress-bar-wrap{position:relative;height:48px;border:1px solid rgba(0,240,255,0.3);background:rgba(5,11,20,0.5);padding:4px;margin-bottom:32px;}
+.progress-bar-fill{height:100%;background:rgba(0,240,255,0.2);border-right:1px solid var(--bp-blue);transition:width .5s ease-out;position:relative;}
+.progress-bar-fill::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,240,255,0.1) 2px,rgba(0,240,255,0.1) 4px);opacity:.3;}
+.progress-bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--bp-cyan);box-shadow:0 0 10px rgba(0,255,157,0.3),0 0 20px rgba(0,255,157,0.1);}
+.progress-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--bp-text);z-index:10;mix-blend-mode:difference;}
+.progress-grid-lines{position:absolute;inset:0;display:flex;justify-content:space-between;padding:0 8px;pointer-events:none;}
+.progress-grid-line{height:100%;width:1px;background:rgba(26,38,52,0.5);}
+.terminal{position:relative;}
+.terminal-label{position:absolute;top:-12px;left:16px;background:rgba(10,22,37,0.8);padding:0 8px;font-size:12px;color:var(--bp-dim);z-index:10;}
+.terminal-content{height:300px;border:1px solid var(--bp-grid);background:#030508;padding:16px;font-size:12px;overflow-y:auto;font-family:'JetBrains Mono',monospace;}
+.terminal-line{display:flex;gap:8px;margin-bottom:4px;}
+.terminal-line .num{color:rgba(92,124,138,0.3);}
+.terminal-line .text{color:var(--bp-dim);}
+.terminal-line .text.error{color:var(--bp-alert);}
+.terminal-line .text.success{color:var(--bp-cyan);}
+.terminal-cursor{width:8px;height:16px;background:var(--bp-blue);animation:pulse 1s step-end infinite;margin-top:8px;}
+/* Build Complete */
+.complete-wrap{text-align:center;padding:32px 0;position:relative;}
+.success-icon-wrap{width:96px;height:96px;margin:0 auto 32px;position:relative;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,255,157,0.3);border-radius:50%;}
+.success-icon-ring{position:absolute;inset:0;border:1px solid var(--bp-cyan);border-radius:50%;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;opacity:.2;}
+.success-icon-inner{width:80px;height:80px;border:1px solid rgba(0,255,157,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,255,157,0.05);}
+.complete-title{font-family:'Share Tech Mono',monospace;font-size:36px;color:var(--bp-text);letter-spacing:.1em;margin-bottom:8px;}
+.complete-divider{width:128px;height:1px;background:rgba(0,255,157,0.5);margin:0 auto 32px;box-shadow:0 0 10px rgba(0,255,157,0.3),0 0 20px rgba(0,255,157,0.1);}
+.manifest-card{border:1px solid var(--bp-grid);background:rgba(5,11,20,0.5);padding:24px;max-width:448px;margin:0 auto 32px;text-align:left;position:relative;}
+.manifest-card .corner{border-color:var(--bp-cyan);}
+.manifest-grid{display:grid;grid-template-columns:100px 1fr;gap:16px;font-size:12px;}
+.manifest-label{color:var(--bp-dim);}
+.manifest-value{color:var(--bp-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.manifest-value.hash{color:var(--bp-blue);user-select:all;display:flex;align-items:center;gap:8px;}
+.manifest-value.cyan{color:var(--bp-cyan);}
+.manifest-value.alert{color:var(--bp-alert);display:flex;flex-direction:column;}
+.manifest-expiry-helper{font-size:10px;color:var(--bp-dim);margin-top:4px;}
+.share-card{border:1px solid var(--bp-grid);background:rgba(5,11,20,0.5);padding:16px;max-width:448px;margin:0 auto 32px;position:relative;}
+.share-card .corner{border-color:var(--bp-blue);}
+.share-title{font-size:12px;color:var(--bp-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;}
+.share-input-wrap{display:flex;gap:8px;}
+.share-input{flex:1;background:var(--bp-dark);border:1px solid var(--bp-grid);padding:8px 12px;color:var(--bp-text);font-size:12px;outline:none;cursor:default;}
+.share-input:focus{border-color:var(--bp-blue);}
+.copy-btn{padding:8px 16px;border:1px solid var(--bp-blue);background:rgba(0,240,255,0.05);color:var(--bp-blue);font-size:12px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:4px;}
+.copy-btn:hover{background:rgba(0,240,255,0.1);}
+.copy-btn.copied{border-color:var(--bp-cyan);background:rgba(0,255,157,0.1);color:var(--bp-cyan);}
+.complete-actions{display:flex;flex-direction:column;gap:16px;justify-content:center;margin-bottom:48px;}
+@media(min-width:768px){.complete-actions{flex-direction:row;}}
+.complete-star{border-top:1px solid rgba(26,38,52,0.3);padding-top:32px;}
+.complete-star p{font-size:12px;color:var(--bp-dim);margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em;}
+/* Error */
+.error-wrap{border:1px solid var(--bp-alert);background:rgba(255,153,0,0.05);padding:32px;text-align:center;}
+.error-title{font-size:28px;color:var(--bp-alert);margin-bottom:16px;font-weight:700;letter-spacing:.1em;}
+.error-divider{height:1px;width:100%;background:rgba(255,153,0,0.3);margin-bottom:24px;}
+.error-message{color:var(--bp-text);margin-bottom:24px;font-size:14px;}
+.error-details{margin-bottom:24px;}
+.error-detail-item{padding:12px;border:1px solid var(--bp-grid);background:rgba(5,11,20,0.5);margin-bottom:8px;display:inline-block;}
+.error-detail-label{font-size:10px;color:var(--bp-dim);}
+.error-detail-value{font-size:10px;color:var(--bp-blue);user-select:all;}
+.error-reset{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border:1px solid var(--bp-alert);color:var(--bp-alert);background:transparent;cursor:pointer;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;transition:all .3s;}
+.error-reset:hover{background:var(--bp-alert);color:var(--bp-dark);}
+/* Build History */
+.build-history{margin-top:32px;border:1px solid rgba(139,92,246,0.4);background:rgba(139,92,246,0.05);position:relative;}
+.history-header{width:100%;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;text-align:left;background:transparent;border:none;color:inherit;font-family:inherit;cursor:pointer;transition:background .3s;}
+.history-header:hover{background:rgba(139,92,246,0.1);}
+.history-header-left{display:flex;align-items:center;gap:12px;}
+.history-count{padding:2px 6px;background:rgba(139,92,246,0.2);border-radius:2px;font-size:12px;color:rgba(139,92,246,0.7);}
+.history-arrow{transition:transform .3s;}
+.history-content{max-height:0;overflow:hidden;transition:max-height .3s;border-top:1px solid rgba(139,92,246,0.3);}
+.history-content.open{max-height:400px;}
+.history-list{max-height:300px;overflow-y:auto;}
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(139,92,246,0.1);cursor:pointer;transition:background .3s;}
+.history-item:hover{background:rgba(139,92,246,0.1);}
+.history-item-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+.history-status-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.history-status-icon.completed{color:var(--bp-cyan);}
+.history-status-icon.failed{color:var(--bp-alert);}
+.history-status-icon.building{color:var(--bp-warning);animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;}
+.history-status-icon.expired{color:var(--bp-dim);}
+.history-item-info{flex:1;min-width:0;}
+.history-item-name{color:var(--bp-text);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.history-item-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--bp-dim);margin-top:2px;}
+.history-item-actions{display:flex;gap:8px;opacity:0;transition:opacity .3s;}
+.history-item:hover .history-item-actions{opacity:1;}
+.history-action{background:none;border:none;padding:4px;cursor:pointer;color:var(--bp-dim);transition:color .3s;}
+.history-action.download{color:var(--bp-cyan);}
+.history-action.remove:hover{color:var(--bp-alert);}
+.history-footer{padding:8px 16px;border-top:1px solid rgba(139,92,246,0.2);background:rgba(139,92,246,0.05);display:flex;justify-content:flex-end;}
+.history-clear{background:none;border:none;font-size:12px;color:rgba(139,92,246,0.7);cursor:pointer;transition:color .3s;font-family:inherit;}
+.history-clear:hover{color:var(--bp-alert);}
+/* Scrollbar */
+.custom-scrollbar::-webkit-scrollbar{width:6px;}
+.custom-scrollbar::-webkit-scrollbar-track{background:rgba(5,11,20,0.5);}
+.custom-scrollbar::-webkit-scrollbar-thumb{background:var(--bp-grid);border-radius:3px;}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover{background:rgba(0,240,255,0.3);}
+/* Animations */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeIn .5s ease-out;}
+.hidden{display:none!important;}
+/* File input styling */
+.file-input-hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="tech-line-top"></div>
+<div class="tech-line-bottom"></div>
+<div class="tech-line-left"></div>
+<div class="tech-line-right"></div>
+
+<div class="container">
+<div class="main-wrap" id="app">
+
+<!-- Header -->
+<header class="blueprint-box header">
+  <div class="header-left">
+    <div class="logo">
+      <svg viewBox="0 0 56 56" fill="none">
+        <rect x="2" y="2" width="52" height="52" rx="8" stroke="var(--bp-blue)" stroke-width="1.5" fill="rgba(0,240,255,0.05)"/>
+        <text x="28" y="34" text-anchor="middle" fill="var(--bp-blue)" font-family="'Share Tech Mono'" font-size="22" font-weight="bold">A2A</text>
+      </svg>
+    </div>
+    <div class="header-title">
+      <h1>APP<span>2</span>APK</h1>
+      <div class="header-sub" data-i18n="headerSub">
+        <span data-i18n="headerTagline">// 自动化构建系统</span>
+        <span>::</span>
+        <span data-i18n="headerMode">中文模式</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="lang-switch">
+      <button class="lang-btn active" data-lang="zh" onclick="switchLang('zh')">ZH 中文</button>
+      <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN English</button>
+    </div>
+    <a class="github-star" href="https://github.com/sdlw7757/app2apk" target="_blank" rel="noopener noreferrer">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-br"></div>
+      <svg class="star-icon gt-hide" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <div class="star-count"><span id="starCount">★</span> <span id="starNum">5.2k</span></div>
+      <div class="h-4 w-[1px]" style="height:16px;width:1px;background:var(--bp-grid);display:none;margin:0 4px;"></div>
+      <span class="star-cta" data-i18n="starCta">给仓库点星</span>
+    </a>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="blueprint-box border-t-0 content" style="min-height:400px;">
+
+  <!-- Scanline -->
+  <div class="scanline"></div>
+  <div class="crosshair crosshair-tl"></div>
+  <div class="crosshair crosshair-tr"></div>
+  <div class="crosshair crosshair-bl"></div>
+  <div class="crosshair crosshair-br"></div>
+
+  <!-- ================ IDLE STATE ================ -->
+  <div id="idleState">
+
+    <!-- Guide Section -->
+    <div class="guide-section">
+      <button class="guide-toggle" onclick="toggleGuide()">
+        <div class="guide-toggle-left">
+          <span class="icon">💡</span>
+          <span class="title" data-i18n="guideTitle">新手指南：如何开始</span>
+        </div>
+        <div class="guide-toggle-right">
+          <span class="hide-mobile" data-i18n="guideCollapse" id="guideToggleText">[收起]</span>
+          <svg class="arrow open" id="guideArrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </button>
+      <div class="guide-content open" id="guideContent">
+        <div class="guide-grid">
+          <div class="guide-intro"><p data-i18n="guideIntro">专为 AI 编程打造。将 Gemini、ChatGPT、DeepSeek 等 AI 生成的代码一键打包成安卓 App。</p></div>
+
+          <div class="guide-card" style="--hover-color:var(--bp-blue)">
+            <div class="guide-card-header" style="color:var(--bp-blue);border-color:rgba(0,240,255,0.2);">
+              <span data-i18n="guideModeATitle">模式 A：单文件</span><span>01</span>
+            </div>
+            <p class="guide-card-desc" data-i18n="guideModeADesc">上传单个代码文件（支持 .html, .js, .jsx, .ts, .tsx），我们会自动识别并打包。</p>
+            <div class="guide-tags">
+              <span class="guide-tag" style="color:var(--bp-blue);background:rgba(0,240,255,0.1);border-color:rgba(0,240,255,0.2);">index.html</span>
+              <span class="guide-tag" style="color:var(--bp-blue);background:rgba(0,240,255,0.1);border-color:rgba(0,240,255,0.2);">App.tsx</span>
+            </div>
+          </div>
+
+          <div class="guide-card" style="--hover-color:var(--bp-cyan)">
+            <div class="guide-card-header" style="color:var(--bp-cyan);border-color:rgba(0,255,157,0.2);">
+              <span data-i18n="guideModeBTitle">模式 B：粘贴代码</span><span>02</span>
+            </div>
+            <p class="guide-card-desc" data-i18n="guideModeBDesc">复制 ChatGPT/Gemini/Claude 等 AI 生成的代码并粘贴到这里，我们会智能识别并打包。</p>
+            <div class="guide-tags">
+              <span class="guide-tag" style="color:var(--bp-cyan);background:rgba(0,255,157,0.1);border-color:rgba(0,255,157,0.2);">Ctrl+V</span>
+              <span class="guide-tag" style="color:var(--bp-cyan);background:rgba(0,255,157,0.1);border-color:rgba(0,255,157,0.2);">AI Code</span>
+            </div>
+          </div>
+
+          <div class="guide-card" style="--hover-color:var(--bp-orange)">
+            <div class="guide-card-header" style="color:var(--bp-orange);border-color:rgba(249,115,22,0.2);">
+              <span data-i18n="guideModeCTitle">模式 C：ZIP 压缩包</span><span>03</span>
+            </div>
+            <p class="guide-card-desc" data-i18n="guideModeCDesc">适用于从 AI Studio、V0 等平台下载的压缩包。支持 HTML 项目和 React/Vite 项目的 ZIP 压缩包。</p>
+            <div class="guide-tags">
+              <span class="guide-tag" style="color:var(--bp-orange);background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.2);">project.zip</span>
+              <span class="guide-tag" style="color:var(--bp-orange);background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.2);">Assets</span>
+            </div>
+          </div>
+
+          <div class="guide-card" style="--hover-color:var(--bp-green)">
+            <div class="guide-card-header" style="color:var(--bp-green);border-color:rgba(34,197,94,0.2);">
+              <span data-i18n="guidePermissionsTitle">权限配置</span><span>⚙️</span>
+            </div>
+            <p class="guide-card-desc" data-i18n="guidePermissionsDesc">在高级设置中配置安卓权限（可选，默认只包含网络访问权限）。</p>
+            <div class="guide-tags">
+              <span class="guide-tag" style="color:var(--bp-green);background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.2);" data-i18n="guidePermNetwork">网络</span>
+              <span class="guide-tag" style="color:var(--bp-green);background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.2);" data-i18n="guidePermCamera">相机</span>
+              <span class="guide-tag" style="color:var(--bp-green);background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.2);" data-i18n="guidePermStorage">存储</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parameters Grid -->
+    <div class="params-grid">
+      <!-- App Name -->
+      <div class="param-group">
+        <div class="param-label" data-i18n="paramLabel">参数：应用标识</div>
+        <div class="app-name-input">
+          <div class="c c-tl"></div><div class="c c-tr"></div><div class="c c-bl"></div><div class="c c-br"></div>
+          <div class="app-name-flex">
+            <div id="appNameAuto" class="app-name-auto" onclick="switchAppNameMode()">
+              <span style="display:flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span data-i18n="autoLabel">自动：使用文件名</span>
+              </span>
+              <span class="switch-text"><span class="hide-mobile" data-i18n="switchToCustom">切换到自定义</span><span style="font-size:16px;">→</span></span>
+            </div>
+            <div id="appNameCustom" style="display:none;flex:1;">
+              <input type="text" id="customAppName" class="app-name-custom" data-i18n-placeholder="customPlaceholder" placeholder="请输入自定义应用名称" oninput="checkPasteSubmit()" autofocus>
+              <button class="app-name-toggle" onclick="switchAppNameMode()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span class="hide-mobile" data-i18n="autoBadge">自动</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="param-helper">
+          <span id="appNameHelper" data-i18n="helperAuto">📁 应用名称将与上传的文件名保持一致</span>
+          <span class="edit-link" id="editLink" onclick="switchAppNameMode()" data-i18n="clickToEdit">[点击编辑]</span>
+        </div>
+      </div>
+
+      <!-- Version -->
+      <div class="param-group">
+        <div class="param-label purple" data-i18n="versionLabel">版本号</div>
+        <div class="version-input-wrap" id="versionWrap">
+          <div class="c c-tl"></div><div class="c c-tr"></div><div class="c c-bl"></div><div class="c c-br"></div>
+          <input type="text" id="appVersion" class="version-input" value="1.0.0" placeholder="1.0.0" oninput="validateVersionInput(this)">
+        </div>
+        <div class="version-helper">
+          <span id="versionHelper" data-i18n="versionHelper">默认: 1.0.0</span>
+        </div>
+      </div>
+
+      <!-- Icon -->
+      <div class="param-group">
+        <div class="param-label orange" data-i18n="iconLabel">应用图标</div>
+        <div class="icon-upload-wrap" id="iconUploadWrap">
+          <div class="c c-tl"></div><div class="c c-tr"></div><div class="c c-bl"></div><div class="c c-br"></div>
+          <div id="iconPreviewArea" style="display:none;">
+            <div class="icon-preview">
+              <img id="iconPreviewImg" class="icon-preview-img" src="" alt="App Icon">
+              <div class="icon-preview-info">
+                <div class="icon-preview-name" id="iconFileName"></div>
+                <div class="icon-preview-size" id="iconFileSize"></div>
+              </div>
+              <button class="icon-remove" onclick="removeIcon()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <label id="iconUploadLabel" class="icon-label" for="iconInput">
+            <div class="icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <span class="icon-text" data-i18n="iconPlaceholder">可选：上传自定义图标</span>
+          </label>
+          <input type="file" id="iconInput" class="icon-upload-btn" accept="image/png,image/jpeg" onchange="handleIconUpload(event)">
+        </div>
+        <div class="icon-helper">PNG / JPG &lt; 2MB</div>
+      </div>
+    </div>
+
+    <!-- Permissions -->
+    <div class="blueprint-box permissions-wrap">
+      <div class="corner corner-tl corner-blue"></div><div class="corner corner-tr corner-blue"></div>
+      <div class="corner corner-bl corner-blue"></div><div class="corner corner-br corner-blue"></div>
+      <div class="param-label" style="position:static;display:inline-block;margin-bottom:8px;" data-i18n="permissionsTitle">应用权限</div>
+
+      <div class="permissions-header">
+        <button class="permissions-toggle" onclick="togglePermissions()">
+          <svg class="perm-arrow" id="permArrow" width="12" height="12" viewBox="0 0 20 20" fill="currentColor" style="transition:transform .3s;"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z"/></svg>
+          <span data-i18n="permissionsShowMore">显示更多分类</span>
+          <span class="permissions-count" id="permCount">2</span>
+        </button>
+        <div class="permissions-actions hidden" id="permActions">
+          <button class="permissions-action" onclick="setDefaultPerms()" data-i18n="permissionsDefaults">默认</button>
+          <button class="permissions-action" onclick="selectAllPerms()" data-i18n="permissionsAll">全选</button>
+          <button class="permissions-action" onclick="clearPerms()" data-i18n="permissionsClear">清除</button>
+        </div>
+      </div>
+      <div class="permissions-info">
+        <span data-i18n="permissionsInfo">选择应用需要的权限。默认包含网络访问权限。</span>
+        <span class="permissions-danger hidden" id="permDangerNote">▲ <span data-i18n="permissionsDangerousNote">包含敏感权限</span></span>
+      </div>
+      <div class="permissions-grid hidden" id="permGrid"></div>
+    </div>
+
+    <!-- PWA Toggle -->
+    <div class="pwa-toggle">
+      <div class="c c-tl"></div><div class="c c-tr"></div><div class="c c-bl"></div><div class="c c-br"></div>
+      <div class="pwa-label" data-i18n="pwaPublishLabel">PWA 发布</div>
+      <div class="pwa-content" onclick="togglePwa()">
+        <label class="pwa-checkbox">
+          <div class="toggle-switch" id="pwaSwitch">
+            <div class="toggle-dot"></div>
+          </div>
+          <div>
+            <div class="pwa-text" data-i18n="pwaPublishSwitch">同时发布为 PWA 网页应用</div>
+            <div class="pwa-hint" data-i18n="pwaPublishHint">生成可安装的网页版本</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+      <span class="section-title" data-i18n="sectionLabel">区域：数据输入</span>
+      <div class="ruler-x" style="width:33%;opacity:.3;"></div>
+    </div>
+
+    <!-- Mode Tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="html" onclick="switchMode('html')" data-i18n="modeUploadHtml">模式 A：单文件模式</button>
+      <button class="mode-tab paste" data-mode="html-paste" onclick="switchMode('html-paste')" data-i18n="modePasteCode">模式 B：代码粘贴模式</button>
+      <button class="mode-tab" data-mode="zip" onclick="switchMode('zip')" data-i18n="modeReactZip">模式 C：ZIP 压缩包模式</button>
+    </div>
+
+    <!-- Mode Description -->
+    <div class="mode-desc" id="modeDesc" data-i18n="formatInfoA">📁 支持格式：.html, .js, .jsx, .tsx (自动识别 React 组件)</div>
+
+    <!-- ===== MODE A & C: File Upload ===== -->
+    <div id="fileUploadArea">
+      <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-grid-overlay"></div>
+        <div class="upload-corner upload-corner-tl"></div>
+        <div class="upload-corner upload-corner-tr"></div>
+        <div class="upload-corner upload-corner-bl"></div>
+        <div class="upload-corner upload-corner-br"></div>
+        <div class="upload-icon" id="uploadIcon">📄</div>
+        <div class="upload-text" id="uploadText" data-i18n="initTransfer">开始数据传输</div>
+        <div class="upload-sub" data-i18n="dragOrBrowse">拖拽文件或点击选择</div>
+        <div class="upload-spec" id="uploadSpec" data-i18n="maxSizeLabelCode">最大：30MB // HTML/JS/JSX/TSX</div>
+        <input type="file" id="fileInput" class="file-input-hidden" onchange="handleFileSelect(event)">
+      </div>
+
+      <!-- Smart Detection Info (ZIP mode) -->
+      <div class="info-box" id="zipDetectBox" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);display:none;">
+        <div class="c c-tl" style="border-color:rgba(34,197,94,0.5);"></div><div class="c c-tr" style="border-color:rgba(34,197,94,0.5);"></div>
+        <div class="c c-bl" style="border-color:rgba(34,197,94,0.5);"></div><div class="c c-br" style="border-color:rgba(34,197,94,0.5);"></div>
+        <div class="info-box-content">
+          <span class="icon">🔍</span>
+          <div style="font-size:12px;">
+            <p style="color:#22c55e;font-weight:700;" data-i18n="zipSmartDetect">智能项目检测</p>
+            <p style="color:var(--bp-text);margin-top:4px;" data-i18n="zipSmartDetectDesc">我们会自动识别您的项目类型，并选择最佳的打包方案：</p>
+            <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;">
+              <span><span style="color:var(--bp-blue);">⚛️</span> <span style="color:var(--bp-dim);" data-i18n="zipTypeReact">React/Vite → npm 构建</span></span>
+              <span><span style="color:var(--bp-cyan);">📄</span> <span style="color:var(--bp-dim);" data-i18n="zipTypeHtml">HTML+JS+CSS → 直接打包</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Large File Tip (ZIP mode) -->
+      <div class="info-box" id="zipLargeBox" style="border-color:rgba(0,255,157,0.3);background:rgba(0,255,157,0.05);display:none;">
+        <div class="c c-tl" style="border-color:rgba(0,255,157,0.5);"></div><div class="c c-tr" style="border-color:rgba(0,255,157,0.5);"></div>
+        <div class="c c-bl" style="border-color:rgba(0,255,157,0.5);"></div><div class="c c-br" style="border-color:rgba(0,255,157,0.5);"></div>
+        <div class="info-box-content">
+          <span class="icon" style="color:var(--bp-cyan);">💡</span>
+          <div style="font-size:12px;">
+            <p style="color:var(--bp-text);" data-i18n="largeFileWarning">如果压缩包过大（>10MB），可能包含了依赖文件夹。</p>
+            <p style="color:rgba(0,255,157,0.7);margin-top:4px;" data-i18n="largeFileHint">请删除 node_modules、dist、build 等文件夹后再压缩上传。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- White Screen Warning (ZIP mode) -->
+      <div class="info-box" id="zipWarningBox" style="border-color:rgba(251,191,36,0.5);background:rgba(251,191,36,0.05);display:none;">
+        <div class="c c-tl" style="border-color:#f59e0b;border-width:2px;width:12px;height:12px;"></div><div class="c c-tr" style="border-color:#f59e0b;border-width:2px;width:12px;height:12px;"></div>
+        <div class="c c-bl" style="border-color:#f59e0b;border-width:2px;width:12px;height:12px;"></div><div class="c c-br" style="border-color:#f59e0b;border-width:2px;width:12px;height:12px;"></div>
+        <div class="info-box-content">
+          <span class="icon" style="font-size:20px;">⚠️</span>
+          <div>
+            <p style="color:#fbbf24;font-family:'Share Tech Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.05em;" data-i18n="warningTitle">警告：白屏防护</p>
+            <div style="font-size:12px;color:var(--bp-dim);margin-top:8px;">
+              <p style="color:var(--bp-text);" data-i18n="warningBody">如果安装后看到白屏，请在 Vite 配置中启用 @vitejs/plugin-legacy 插件。</p>
+              <pre style="background:rgba(5,11,20,0.7);padding:8px;margin-top:8px;border:1px solid var(--bp-grid);overflow-x:auto;font-size:10px;color:var(--bp-cyan);"><code>// vite.config.js
+import legacy from '@vitejs/plugin-legacy'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    legacy({ targets: ['chrome >= 52'] })
+  ],
+  base: './'  // Required for APK
+})</code></pre>
+              <div style="display:flex;gap:16px;margin-top:8px;font-size:10px;">
+                <span><span style="color:#f87171;">✗</span> <span style="color:var(--bp-dim);" data-i18n="warningTip1">旧版 WebView 不支持 ES Modules</span></span>
+                <span><span style="color:#4ade80;">✓</span> <span style="color:var(--bp-dim);" data-i18n="warningTip2">Legacy 插件会生成兼容代码</span></span>
+              </div>
+            </div>
+            <a href="https://github.com/sdlw7757/app2apk" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:#fbbf24;text-decoration:none;" data-i18n="docsLink">查看完整文档 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODE B: Paste Code ===== -->
+    <div id="pasteCodeArea" class="hidden">
+      <div class="paste-area">
+        <div class="paste-textarea-wrap">
+          <div class="c c-tl"></div><div class="c c-tr"></div><div class="c c-bl"></div><div class="c c-br"></div>
+          <textarea id="codeTextarea" class="paste-textarea" data-i18n-placeholder="textareaPlaceholder" placeholder="// 在此粘贴您的代码
+// 支持：
+// 1. 完整 HTML 文档 (&lt;!DOCTYPE html&gt;...)
+// 2. React 组件 (export default function App...)
+// 3. 普通 JavaScript/TypeScript 代码" oninput="checkPasteSubmit()"></textarea>
+        </div>
+        <button id="pasteSubmit" class="paste-submit" onclick="startPasteBuild()" disabled>
+          <div class="gradient-bg"></div>
+          <span id="pasteBtnText" data-i18n="enterAppName">请先输入应用名称</span>
+        </button>
+        <div class="paste-info">
+          <span id="charCount" data-i18n="charCount" data-i18n-var-count="0">字符：0</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="codeTypeBadge"></span>
+            <span style="color:rgba(0,255,157,0.7);" data-i18n="htmlSupport">支持：HTML / JS / JSX / TSX</span>
+          </div>
+        </div>
+        <div id="reactDetectBox" class="info-box" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);display:none;">
+          <div class="c c-tl" style="border-color:rgba(34,197,94,0.5);"></div><div class="c c-tr" style="border-color:rgba(34,197,94,0.5);"></div>
+          <div class="c c-bl" style="border-color:rgba(34,197,94,0.5);"></div><div class="c c-br" style="border-color:rgba(34,197,94,0.5);"></div>
+          <div class="info-box-content">
+            <span class="icon">⚛️</span>
+            <div style="font-size:12px;">
+              <p style="color:#22c55e;font-weight:700;" data-i18n="reactDetected">检测到 React 组件！</p>
+              <p style="color:var(--bp-text);margin-top:4px;" data-i18n="reactDetectedDesc">您的代码将被自动包装为完整的 React 项目，包含 Vite、Tailwind CSS 和所有必要的依赖。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Build History -->
+    <div class="build-history" id="buildHistory">
+      <button class="history-header" onclick="toggleHistory()">
+        <div class="history-header-left">
+          <span style="font-size:14px;">📋</span>
+          <span style="color:rgb(139,92,246);font-size:12px;text-transform:uppercase;letter-spacing:.05em;" data-i18n="historyTitle">最近构建</span>
+          <span class="history-count" id="historyCount">0</span>
+        </div>
+        <svg class="history-arrow" id="historyArrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="history-content" id="historyContent">
+        <div class="history-list custom-scrollbar" id="historyList"></div>
+        <div class="history-footer">
+          <button class="history-clear" onclick="clearHistory()" data-i18n="historyClearAll">清空全部</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ BUILD PROGRESS STATE ================ -->
+  <div id="progressState" class="hidden">
+    <div class="progress-status">
+      <div class="progress-status-text" id="progressStatusText" data-i18n="progressStatusProcessing">状态：处理中...</div>
+      <div class="ruler-x" style="width:33%;opacity:.3;"></div>
+    </div>
+
+    <div id="queueBanner" class="queue-banner hidden">
+      <div class="icon">⏳</div>
+      <div>
+        <div class="title" data-i18n="queueTitle">正在排队等待构建</div>
+        <div class="desc" id="queueDesc" data-i18n="queueInfo" data-i18n-var-position="1" data-i18n-var-total="2">当前排第 1 位（共 2 个任务）</div>
+      </div>
+    </div>
+
+    <div class="task-info-grid">
+      <div class="task-info-item">
+        <span class="label" data-i18n="targetFile">目标文件</span>
+        <span class="value" id="taskFileName">(RESTORED SESSION)</span>
+      </div>
+      <div class="task-info-item">
+        <span class="label" data-i18n="taskHash">任务指纹</span>
+        <span class="value hash" id="taskIdDisplay">D2A-XXXX</span>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%">
+        <div class="progress-grid-lines">
+          <div class="progress-grid-line"></div><div class="progress-grid-line"></div><div class="progress-grid-line"></div>
+          <div class="progress-grid-line"></div><div class="progress-grid-line"></div><div class="progress-grid-line"></div>
+          <div class="progress-grid-line"></div><div class="progress-grid-line"></div><div class="progress-grid-line"></div>
+          <div class="progress-grid-line"></div>
+        </div>
+      </div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-label" data-i18n="systemLogs">系统日志</div>
+      <div class="terminal-content custom-scrollbar" id="terminalLogs">
+        <div class="terminal-cursor" id="terminalCursor"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ COMPLETE STATE ================ -->
+  <div id="completeState" class="hidden">
+    <div class="complete-wrap">
+      <div class="success-icon-wrap">
+        <div class="success-icon-ring"></div>
+        <div class="success-icon-inner">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--bp-cyan)" stroke-width="1.5"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      </div>
+      <h2 class="complete-title" data-i18n="completeTitle">流程完成</h2>
+      <div class="complete-divider"></div>
+
+      <div class="manifest-card">
+        <div class="corner corner-tl" style="border-color:var(--bp-cyan);"></div><div class="corner corner-tr" style="border-color:var(--bp-cyan);"></div>
+        <div class="corner corner-bl" style="border-color:var(--bp-cyan);"></div><div class="corner corner-br" style="border-color:var(--bp-cyan);"></div>
+        <div class="manifest-grid">
+          <span class="manifest-label" data-i18n="outputName">输出名称:</span>
+          <span class="manifest-value" id="completeFileName">app.apk</span>
+          <span class="manifest-label" data-i18n="formatLabel">格式:</span>
+          <span class="manifest-value" style="color:var(--bp-blue);" data-i18n="formatValue">Android APK</span>
+          <span class="manifest-label" data-i18n="taskIdLabel">任务编号:</span>
+          <span class="manifest-value hash" id="completeTaskId">D2A-XXXX</span>
+          <span class="manifest-label" data-i18n="statusLabel">状态:</span>
+          <span class="manifest-value cyan" data-i18n="statusValue">可用于部署</span>
+          <span class="manifest-label" data-i18n="expiryLabel">有效期:</span>
+          <span class="manifest-value alert" id="completeExpiry">
+            <span id="expiryDate">2026-05-30 14:00</span>
+            <span class="manifest-expiry-helper" id="expiryHelper">约 2 小时 0 分后自动清理</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="share-card">
+        <div class="corner corner-tl" style="border-color:var(--bp-blue);"></div><div class="corner corner-tr" style="border-color:var(--bp-blue);"></div>
+        <div class="corner corner-bl" style="border-color:var(--bp-blue);"></div><div class="corner corner-br" style="border-color:var(--bp-blue);"></div>
+        <div class="share-title" data-i18n="shareTitle">分享链接:</div>
+        <div class="share-input-wrap">
+          <input type="text" class="share-input" id="shareUrl" readonly onclick="this.select()">
+          <button class="copy-btn" id="copyBtn" onclick="copyShareLink()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            <span id="copyBtnText" data-i18n="copyLink">复制链接</span>
+          </button>
+        </div>
+        <div style="font-size:10px;color:var(--bp-dim);margin-top:8px;opacity:.7;" data-i18n="shareLinkDesc">分享此链接让他人下载您的 APK</div>
+      </div>
+
+      <div class="info-box" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);margin-bottom:24px;">
+        <div class="c c-tl" style="border-color:rgba(34,197,94,0.5);"></div><div class="c c-tr" style="border-color:rgba(34,197,94,0.5);"></div>
+        <div class="c c-bl" style="border-color:rgba(34,197,94,0.5);"></div><div class="c c-br" style="border-color:rgba(34,197,94,0.5);"></div>
+        <div class="info-box-content" style="flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;"><span class="icon">✅</span><span style="color:#22c55e;font-weight:700;" data-i18n="demoNoticeTitle">真实 APK 构建</span></div>
+          <p style="color:var(--bp-dim);font-size:11px;line-height:1.6;" data-i18n="demoNoticeDesc">APK 已通过 Android 构建流水线生成，可直接下载安装到安卓设备。</p>
+        </div>
+      </div>
+
+      <div class="complete-actions">
+        <button class="btn-tech btn-primary" onclick="downloadApk()">
+          <span style="display:flex;align-items:center;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span data-i18n="downloadBtn">下载 APK</span>
+          </span>
+        </button>
+        <button class="btn-tech btn-secondary" onclick="downloadBuildLog()">
+          <span style="display:flex;align-items:center;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span data-i18n="downloadLogBtn">下载构建日志</span>
+          </span>
+        </button>
+        <button class="btn-tech" style="color:var(--bp-dim);border-color:var(--bp-grid);" onclick="resetAll()" data-i18n="newBuildBtn">开始新的构建</button>
+      </div>
+
+      <div class="complete-star">
+        <p data-i18n="starRequest">觉得好用？支持一下我们！</p>
+        <a class="btn-amber" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:14px;text-decoration:none;transition:all .3s;" href="https://github.com/sdlw7757/app2apk" target="_blank" rel="noopener noreferrer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span data-i18n="starButton">★ 去 GitHub 点星</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================ ERROR STATE ================ -->
+  <div id="errorState" class="hidden">
+    <div class="error-wrap">
+      <h2 class="error-title" data-i18n="systemErrorTitle">系统错误</h2>
+      <div class="error-divider"></div>
+      <p class="error-message" id="errorMessage">未知错误</p>
+      <div class="error-details">
+        <div class="error-detail-item" id="errorTaskIdBox" style="display:none;">
+          <div class="error-detail-label" data-i18n="taskIdLabel">任务编号:</div>
+          <div class="error-detail-value" id="errorTaskId"></div>
+        </div>
+      </div>
+      <button class="error-reset" onclick="resetAll()" data-i18n="resetButton">重新开始</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-left">
+    <span class="status"><span data-i18n="systemStatus">系统状态：正常</span></span>
+    <span class="status-dot"></span>
+  </div>
+  <div class="footer-right">
+    <span data-i18n="buildVersion">版本：2.3.0</span>
+    <span data-i18n="latency">延迟：12ms</span>
+    <span style="color:rgba(0,240,255,0.5);" data-i18n="blueprintId">编号：BLUEPRINT-01</span>
+  </div>
+</footer>
+
+</div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const STATE = {
+  lang: 'zh',
+  mode: 'html',
+  appNameAuto: true,
+  customAppName: '',
+  version: '1.0.0',
+  iconFile: null,
+  permissions: ['INTERNET', 'ACCESS_NETWORK_STATE'],
+  permissionsExpanded: false,
+  pwaEnabled: false,
+  guideExpanded: true,
+  historyExpanded: false,
+  buildHistory: [],
+  currentTaskId: null,
+  fileName: null,
+  sourceContent: null,
+  sourceFileName: null,
+};
+
+// Permission definitions
+const PERMISSION_CATEGORIES = [
+  { id:'network', label:'Network', labelCn:'网络', permissions:[
+    { key:'INTERNET', label:'Internet', labelCn:'网络访问', desc:'Access the internet', descCn:'允许应用访问互联网' },
+    { key:'ACCESS_NETWORK_STATE', label:'Network State', labelCn:'网络状态', desc:'View network connections', descCn:'查看网络连接状态' },
+  ]},
+  { id:'storage', label:'Storage', labelCn:'存储', permissions:[
+    { key:'READ_EXTERNAL_STORAGE', label:'Read Storage', labelCn:'读取存储', desc:'Read files from storage', descCn:'从存储读取文件', dangerous:true },
+    { key:'WRITE_EXTERNAL_STORAGE', label:'Write Storage', labelCn:'写入存储', desc:'Save files to storage', descCn:'保存文件到存储', dangerous:true },
+  ]},
+  { id:'camera', label:'Camera & Audio', labelCn:'相机和音频', permissions:[
+    { key:'CAMERA', label:'Camera', labelCn:'相机', desc:'Take photos and videos', descCn:'拍照和录像', dangerous:true },
+    { key:'RECORD_AUDIO', label:'Microphone', labelCn:'麦克风', desc:'Record audio', descCn:'录制音频', dangerous:true },
+  ]},
+  { id:'location', label:'Location', labelCn:'位置', permissions:[
+    { key:'ACCESS_FINE_LOCATION', label:'Precise Location', labelCn:'精确位置', desc:'Access precise location (GPS)', descCn:'获取精确位置（GPS）', dangerous:true },
+    { key:'ACCESS_COARSE_LOCATION', label:'Approximate Location', labelCn:'大致位置', desc:'Access approximate location', descCn:'获取大致位置', dangerous:true },
+  ]},
+  { id:'hardware', label:'Hardware', labelCn:'硬件', permissions:[
+    { key:'VIBRATE', label:'Vibrate', labelCn:'振动', desc:'Control vibration', descCn:'控制设备振动' },
+    { key:'WAKE_LOCK', label:'Wake Lock', labelCn:'唤醒锁定', desc:'Prevent device from sleeping', descCn:'防止设备休眠' },
+  ]},
+  { id:'notification', label:'Notifications', labelCn:'通知', permissions:[
+    { key:'POST_NOTIFICATIONS', label:'Notifications', labelCn:'通知', desc:'Show notifications', descCn:'显示通知', dangerous:true },
+  ]},
+];
+
+const ALL_PERM_KEYS = PERMISSION_CATEGORIES.flatMap(c=>c.permissions.map(p=>p.key));
+const DEFAULT_PERMS = ['INTERNET', 'ACCESS_NETWORK_STATE'];
+
+// ============================================================
+// INTERNATIONALIZATION (i18n)
+// ============================================================
+const I18N = {
+  zh: {
+    headerSub: '// 自动化构建系统',
+    headerTagline: '// 自动化构建系统',
+    headerMode: '中文模式',
+    starCta: '给仓库点星',
+    guideTitle: '新手指南：如何开始',
+    guideCollapse: '[收起]',
+    guideExpand: '[展开]',
+    guideIntro: '专为 AI 编程打造。将 Gemini、ChatGPT、DeepSeek 等 AI 生成的代码一键打包成安卓 App。',
+    guideModeATitle: '模式 A：单文件',
+    guideModeADesc: '上传单个代码文件（支持 .html, .js, .jsx, .ts, .tsx），我们会自动识别并打包。',
+    guideModeBTitle: '模式 B：粘贴代码',
+    guideModeBDesc: '复制 ChatGPT/Gemini/Claude 等 AI 生成的代码并粘贴到这里，我们会智能识别并打包。',
+    guideModeCTitle: '模式 C：ZIP 压缩包',
+    guideModeCDesc: '适用于从 AI Studio、V0 等平台下载的压缩包。支持 HTML 项目和 React/Vite 项目的 ZIP 压缩包。',
+    guidePermissionsTitle: '权限配置',
+    guidePermissionsDesc: '在高级设置中配置安卓权限（可选，默认只包含网络访问权限）。',
+    guidePermNetwork: '网络',
+    guidePermCamera: '相机',
+    guidePermStorage: '存储',
+    paramLabel: '参数：应用标识',
+    autoLabel: '自动：使用文件名',
+    switchToCustom: '切换到自定义',
+    customPlaceholder: '请输入自定义应用名称',
+    autoBadge: '自动',
+    helperAuto: '📁 应用名称将与上传的文件名保持一致',
+    helperCustom: '✏️ 请在上方输入自定义应用名称',
+    helperPaste: '⚠️ 粘贴模式必须填写自定义名称',
+    clickToEdit: '[点击编辑]',
+    versionLabel: '版本号',
+    versionHelper: '默认: 1.0.0',
+    versionFormatError: '格式错误：必须是 x.x.x（如 1.0.0）',
+    iconLabel: '应用图标',
+    iconPlaceholder: '可选：上传自定义图标',
+    iconTooLarge: '图标文件过大，最大支持 2MB。',
+    sectionLabel: '区域：数据输入',
+    modeUploadHtml: '模式 A：单文件模式',
+    modePasteCode: '模式 B：代码粘贴模式',
+    modeReactZip: '模式 C：ZIP 压缩包模式',
+    formatInfoA: '📁 支持格式：.html, .js, .jsx, .tsx (自动识别 React 组件)',
+    formatInfoB: '⚠️ 直接粘贴 HTML, JS, JSX, TS 或 TSX 代码',
+    formatInfoC: '📦 支持 React/Vite 项目 ZIP 或 HTML 多文件 ZIP',
+    initTransfer: '开始数据传输',
+    releaseToUpload: '>> 松手即可上传 <<',
+    dragOrBrowse: '拖拽文件或点击选择',
+    maxSizeLabelCode: '最大：30MB // HTML/JS/JSX/TSX',
+    maxSizeLabel: '最大：30MB // ZIP',
+    submitReady: '>> 启动 APK 构建 <<',
+    submitDisabled: '请输入代码以开始',
+    enterAppName: '请先输入应用名称',
+    charCount: '字符：{count}',
+    htmlSupport: '支持：HTML / JS / JSX / TSX',
+    textareaPlaceholder: '// 在此粘贴您的代码\n// 支持：\n// 1. 完整 HTML 文档 (<!DOCTYPE html>...)\n// 2. React 组件 (export default function App...)\n// 3. 普通 JavaScript/TypeScript 代码',
+    warningTitle: '警告：白屏防护',
+    warningBody: '如果安装后看到白屏，请在 Vite 配置中启用 @vitejs/plugin-legacy 插件。',
+    warningTip1: '旧版 WebView 不支持 ES Modules',
+    warningTip2: 'Legacy 插件会生成兼容代码',
+    docsLink: '查看完整文档 →',
+    largeFileWarning: '如果压缩包过大（>10MB），可能包含了依赖文件夹。',
+    largeFileHint: '请删除 node_modules、dist、build 等文件夹后再压缩上传。',
+    reactDetected: '检测到 React 组件！',
+    reactDetectedDesc: '您的代码将被自动包装为完整的 React 项目，包含 Vite、Tailwind CSS 和所有必要的依赖。',
+    zipSmartDetect: '智能项目检测',
+    zipSmartDetectDesc: '我们会自动识别您的项目类型，并选择最佳的打包方案：',
+    zipTypeReact: 'React/Vite → npm 构建',
+    zipTypeHtml: 'HTML+JS+CSS → 直接打包',
+    // Permissions
+    permissionsTitle: '应用权限',
+    permissionsInfo: '选择应用需要的权限。默认包含网络访问权限。',
+    permissionsDefaults: '默认',
+    permissionsAll: '全选',
+    permissionsClear: '清除',
+    permissionsShowMore: '显示更多分类',
+    permissionsShowLess: '收起',
+    permissionsSelected: '{count} 个权限已选择',
+    permissionsDangerousNote: '包含敏感权限',
+    // Progress
+    progressStatusProcessing: '状态：处理中...',
+    progressStatusQueued: '状态：排队中 ({position}/{total})',
+    progressStatusQueuedPosition: '状态：排队中 (#{position})',
+    progressStatusWaiting: '状态：等待中...',
+    queueTitle: '正在排队等待构建',
+    queueInfo: '当前排第 {position} 位（共 {total} 个任务）',
+    queueWaiting: '等待可用的构建资源...',
+    targetFile: '目标文件',
+    taskHash: '任务指纹',
+    systemLogs: '系统日志',
+    // Complete
+    completeTitle: '流程完成',
+    outputName: '输出名称:',
+    formatLabel: '格式:',
+    formatValue: 'Android APK',
+    taskIdLabel: '任务编号:',
+    statusLabel: '状态:',
+    statusValue: '可用于部署',
+    expiryLabel: '有效期:',
+    downloadBtn: '下载 APK',
+    downloadLogBtn: '下载构建日志',
+    newBuildBtn: '开始新的构建',
+    shareTitle: '分享链接:',
+    copyLink: '复制链接',
+    linkCopied: '链接已复制！',
+    shareLinkDesc: '分享此链接让他人下载您的 APK',
+    starRequest: '觉得好用？支持一下我们！',
+    starButton: '★ 去 GitHub 点星',
+    expiryFuture: '约 {hours} 小时 {minutes} 分后自动清理',
+    expiryPast: '已过期，文件可能已被移除',
+    retention: '（保留 {hours} 小时）',
+    unknown: '未知',
+    // Error
+    systemErrorTitle: '系统错误',
+    resetButton: '重新开始',
+    // History
+    historyTitle: '最近构建',
+    historyClearAll: '清空全部',
+    historyJustNow: '刚刚',
+    historyMinsAgo: '{mins}分钟前',
+    historyHoursAgo: '{hours}小时前',
+    historyDaysAgo: '{days}天前',
+    historyCompleted: '已完成',
+    historyFailed: '失败',
+    historyBuilding: '构建中',
+    historyQueued: '排队中',
+    historyExpired: '已过期',
+    // Footer
+    systemStatus: '系统状态：正常',
+    buildVersion: '版本：2.3.0',
+    latency: '延迟：12ms',
+    blueprintId: '编号：BLUEPRINT-01',
+    // Real build notice
+    demoNoticeTitle: '真实 APK 构建',
+    demoNoticeDesc: 'APK 已通过 Android 构建流水线生成，可直接下载安装到安卓设备。',
+    // PWA
+    pwaPublishLabel: 'PWA 发布',
+    pwaPublishSwitch: '同时发布为 PWA 网页应用',
+    pwaPublishHint: '生成可安装的网页版本',
+  },
+  en: {
+    headerSub: '// AUTOMATED BUILD SYSTEM',
+    headerTagline: '// AUTOMATED BUILD SYSTEM',
+    headerMode: 'ENG-MODE',
+    starCta: 'Star Us!',
+    guideTitle: 'USER GUIDE: HOW TO START',
+    guideCollapse: '[COLLAPSE]',
+    guideExpand: '[EXPAND]',
+    guideIntro: 'Turn your HTML, React, or Vite projects into installable Android APKs in seconds. No coding required.',
+    guideModeATitle: 'MODE A: SINGLE FILE',
+    guideModeADesc: 'Best for simple demos. Upload a single .html file, or a .js/.tsx script. We handle the rest.',
+    guideModeBTitle: 'MODE B: PASTE CODE',
+    guideModeBDesc: 'Copy code from ChatGPT/Gemini/Claude and paste it here. We intelligently detect if it is HTML or React.',
+    guideModeCTitle: 'MODE C: ZIP ARCHIVE',
+    guideModeCDesc: 'For complex projects. Upload a ZIP file containing package.json (React) or index.html + assets.',
+    guidePermissionsTitle: 'PERMISSIONS',
+    guidePermissionsDesc: 'Configure Android permissions in Advanced Settings (optional, defaults to INTERNET access).',
+    guidePermNetwork: 'Network',
+    guidePermCamera: 'Camera',
+    guidePermStorage: 'Storage',
+    paramLabel: 'PARAMETER: APP_IDENTIFIER',
+    autoLabel: 'AUTO: USE_FILENAME',
+    switchToCustom: 'SWITCH TO CUSTOM',
+    customPlaceholder: 'ENTER_CUSTOM_APP_NAME',
+    autoBadge: 'AUTO',
+    helperAuto: '📁 APP NAME WILL MATCH UPLOADED FILENAME',
+    helperCustom: '✏️ ENTER CUSTOM APP NAME ABOVE',
+    helperPaste: '⚠️ CUSTOM NAME REQUIRED FOR PASTED CODE',
+    clickToEdit: '[CLICK TO EDIT]',
+    versionLabel: 'VERSION',
+    versionHelper: 'Default: 1.0.0',
+    versionFormatError: 'Invalid format: must be x.x.x (e.g., 1.0.0)',
+    iconLabel: 'APP ICON',
+    iconPlaceholder: 'Optional: Upload custom icon',
+    iconTooLarge: 'Icon file is too large. Maximum size is 2MB.',
+    sectionLabel: 'SECTION: DATA_INGESTION',
+    modeUploadHtml: 'MODE A: SINGLE FILE',
+    modePasteCode: 'MODE B: PASTE CODE',
+    modeReactZip: 'MODE C: ZIP ARCHIVE',
+    formatInfoA: '📁 Supports: .html, .js, .jsx, .tsx (Auto-detects React components)',
+    formatInfoB: '⚠️ Paste HTML, JS, JSX, TS, or TSX code directly',
+    formatInfoC: '📦 Supports standard React/Vite project ZIP or HTML multi-file ZIP',
+    initTransfer: 'INITIALIZE DATA TRANSFER',
+    releaseToUpload: '>> RELEASE TO UPLOAD <<',
+    dragOrBrowse: 'DRAG FILE OR CLICK TO BROWSE',
+    maxSizeLabelCode: 'MAX: 30MB // HTML/JS/JSX/TSX',
+    maxSizeLabel: 'MAX: 30MB // ZIP',
+    submitReady: '>> INITIATE APK BUILD <<',
+    submitDisabled: 'ENTER CODE TO START',
+    enterAppName: 'ENTER APP NAME FIRST',
+    charCount: 'CHARS: {count}',
+    htmlSupport: 'SUPPORTS: HTML / JS / JSX / TSX',
+    textareaPlaceholder: '// Paste your code here\n// Supports:\n// 1. Full HTML documents (<!DOCTYPE html>...)\n// 2. React Components (export default function App...)\n// 3. Plain JavaScript/TypeScript',
+    warningTitle: 'WARNING: BLANK SCREEN PREVENTION',
+    warningBody: 'If your APK shows a white/blank screen after installation, your Vite config likely needs the @vitejs/plugin-legacy plugin.',
+    warningTip1: 'ES Modules not supported by old WebView',
+    warningTip2: 'Legacy plugin generates compatible code',
+    docsLink: 'VIEW FULL DOCUMENTATION',
+    largeFileWarning: 'If your ZIP file is too large (>10MB), it may contain dependency folders.',
+    largeFileHint: 'Please delete node_modules, dist, build folders before compressing.',
+    reactDetected: 'React Component Detected!',
+    reactDetectedDesc: 'Your code will be automatically wrapped into a complete React project with Vite, Tailwind CSS, and all necessary dependencies.',
+    zipSmartDetect: 'Smart Project Detection',
+    zipSmartDetectDesc: 'We automatically detect your project type and choose the best build approach:',
+    zipTypeReact: 'React/Vite → npm build',
+    zipTypeHtml: 'HTML+JS+CSS → Direct package',
+    permissionsTitle: 'APP PERMISSIONS',
+    permissionsInfo: 'Select permissions your app needs. Default includes INTERNET access.',
+    permissionsDefaults: 'Defaults',
+    permissionsAll: 'All',
+    permissionsClear: 'Clear',
+    permissionsShowMore: 'Show More Categories',
+    permissionsShowLess: 'Show Less',
+    permissionsSelected: '{count} permissions selected',
+    permissionsDangerousNote: 'Includes sensitive permissions',
+    progressStatusProcessing: 'STATUS: PROCESSING...',
+    progressStatusQueued: 'STATUS: QUEUED ({position}/{total})',
+    progressStatusQueuedPosition: 'STATUS: QUEUED (#{position})',
+    progressStatusWaiting: 'STATUS: WAITING IN QUEUE...',
+    queueTitle: 'WAITING IN BUILD QUEUE',
+    queueInfo: 'Your position: #{position} in queue ({total} total)',
+    queueWaiting: 'Waiting for available build slot...',
+    targetFile: 'TARGET_FILE',
+    taskHash: 'TASK_HASH',
+    systemLogs: 'SYSTEM_LOGS',
+    completeTitle: 'SEQUENCE COMPLETE',
+    outputName: 'OUTPUT_NAME:',
+    formatLabel: 'FORMAT:',
+    formatValue: 'ANDROID_APK',
+    taskIdLabel: 'TASK_ID:',
+    statusLabel: 'STATUS:',
+    statusValue: 'READY_FOR_DEPLOYMENT',
+    expiryLabel: 'EXPIRY:',
+    downloadBtn: 'DOWNLOAD ARTIFACT',
+    downloadLogBtn: 'DOWNLOAD BUILD LOG',
+    newBuildBtn: 'INITIATE NEW BUILD',
+    shareTitle: 'SHARE_LINK:',
+    copyLink: 'COPY LINK',
+    linkCopied: 'LINK COPIED!',
+    shareLinkDesc: 'Share this link for others to download your APK',
+    starRequest: 'ENJOYING THIS TOOL? SUPPORT US!',
+    starButton: '★ STAR ON GITHUB',
+    expiryFuture: 'Approx. {hours}h {minutes}m until auto cleanup',
+    expiryPast: 'Expired, file may have been removed',
+    retention: '(Retention {hours}h)',
+    unknown: 'UNKNOWN',
+    systemErrorTitle: 'SYSTEM ERROR',
+    resetButton: 'RESET SEQUENCE',
+    historyTitle: 'RECENT BUILDS',
+    historyClearAll: 'Clear All',
+    historyJustNow: 'Just now',
+    historyMinsAgo: '{mins}m ago',
+    historyHoursAgo: '{hours}h ago',
+    historyDaysAgo: '{days}d ago',
+    historyCompleted: 'Completed',
+    historyFailed: 'Failed',
+    historyBuilding: 'Building',
+    historyQueued: 'Queued',
+    historyExpired: 'Expired',
+    systemStatus: 'SYSTEM STATUS: NOMINAL',
+    buildVersion: 'BUILD_VER: 2.3.0',
+    latency: 'LATENCY: 12ms',
+    blueprintId: 'ID: BLUEPRINT-01',
+    pwaPublishLabel: 'PWA PUBLISHING',
+    pwaPublishSwitch: 'Also publish as PWA web app',
+    pwaPublishHint: 'Generate an installable web version alongside the APK',
+    demoNoticeTitle: 'Real APK Build',
+    demoNoticeDesc: 'APK built via Android build pipeline, ready to download and install on Android devices.',
+  }
+};
+
+// ============================================================
+// LANGUAGE
+// ============================================================
+function switchLang(lang) {
+  STATE.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  localStorage.setItem('demo2apk-lang', lang);
+  applyI18n();
+}
+
+function applyI18n() {
+  const t = I18N[STATE.lang];
+  // Elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    let text = resolveI18nKey(key, t);
+    if (text !== undefined) {
+      // Handle interpolation
+      if (el.dataset.i18nVarCount !== undefined) {
+        text = text.replace('{count}', el.dataset.i18nVarCount);
+      }
+      if (el.dataset.i18nVarPosition !== undefined) {
+        text = text.replace('{position}', el.dataset.i18nVarPosition);
+      }
+      if (el.dataset.i18nVarTotal !== undefined) {
+        text = text.replace('{total}', el.dataset.i18nVarTotal);
+      }
+      if (el.dataset.i18nVarMins !== undefined) {
+        text = text.replace('{mins}', el.dataset.i18nVarMins);
+      }
+      if (el.dataset.i18nVarHours !== undefined) {
+        text = text.replace('{hours}', el.dataset.i18nVarHours);
+      }
+      if (el.dataset.i18nVarDays !== undefined) {
+        text = text.replace('{days}', el.dataset.i18nVarDays);
+      }
+      el.textContent = text;
+    }
+  });
+  // Placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    const text = resolveI18nKey(key, t);
+    if (text !== undefined) el.placeholder = text;
+  });
+  updatePermUI();
+}
+
+function resolveI18nKey(key, t) {
+  return key.split('.').reduce((obj, k) => obj && obj[k] !== undefined ? obj[k] : undefined, t);
+}
+
+// ============================================================
+// GUIDE
+// ============================================================
+function toggleGuide() {
+  STATE.guideExpanded = !STATE.guideExpanded;
+  const content = document.getElementById('guideContent');
+  const arrow = document.getElementById('guideArrow');
+  const text = document.getElementById('guideToggleText');
+  content.classList.toggle('open', STATE.guideExpanded);
+  arrow.classList.toggle('open', STATE.guideExpanded);
+  text.dataset.i18n = STATE.guideExpanded ? 'guideCollapse' : 'guideExpand';
+  applyI18n();
+}
+
+// ============================================================
+// APP NAME MODE
+// ============================================================
+function switchAppNameMode() {
+  if (STATE.mode === 'html-paste') return;
+  STATE.appNameAuto = !STATE.appNameAuto;
+  updateAppNameUI();
+}
+
+function updateAppNameUI() {
+  const auto = document.getElementById('appNameAuto');
+  const custom = document.getElementById('appNameCustom');
+  const helper = document.getElementById('appNameHelper');
+  const editLink = document.getElementById('editLink');
+
+  if (STATE.mode === 'html-paste') {
+    STATE.appNameAuto = false;
+  }
+
+  if (STATE.appNameAuto) {
+    auto.style.display = 'flex';
+    custom.style.display = 'none';
+    helper.dataset.i18n = 'helperAuto';
+    editLink.style.display = '';
+    editLink.dataset.i18n = 'clickToEdit';
+  } else {
+    auto.style.display = 'none';
+    custom.style.display = 'flex';
+    helper.dataset.i18n = STATE.mode === 'html-paste' ? 'helperPaste' : 'helperCustom';
+    editLink.style.display = 'none';
+  }
+  applyI18n();
+}
+
+// ============================================================
+// VERSION
+// ============================================================
+function validateVersionInput(input) {
+  let val = input.value.replace(/[^\d.]/g, '').replace(/\.{2,}/g, '.');
+  if (val.startsWith('.')) val = val.substring(1);
+  const dotCount = (val.match(/\./g) || []).length;
+  if (dotCount > 2) {
+    const parts = val.split('.');
+    val = parts.slice(0,3).join('.');
+  }
+  if (val.length > 11) val = val.substring(0,11);
+  input.value = val;
+  STATE.version = val || '1.0.0';
+
+  const wrap = document.getElementById('versionWrap');
+  const helper = document.getElementById('versionHelper');
+  const valid = /^\d+\.\d+\.\d+$/.test(val);
+  if (val && !valid) {
+    wrap.classList.add('error');
+    input.classList.add('error');
+    helper.innerHTML = '<span class="error-text">' + getText('versionFormatError') + '</span>';
+  } else {
+    wrap.classList.remove('error');
+    input.classList.remove('error');
+    helper.dataset.i18n = 'versionHelper';
+    applyI18n();
+  }
+}
+
+// ============================================================
+// ICON
+// ============================================================
+function handleIconUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) return;
+  if (file.size > 2*1024*1024) {
+    alert(getText('iconTooLarge'));
+    return;
+  }
+  STATE.iconFile = file;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('iconPreviewArea').style.display = '';
+    document.getElementById('iconUploadLabel').style.display = 'none';
+    document.getElementById('iconPreviewImg').src = ev.target.result;
+    document.getElementById('iconFileName').textContent = file.name;
+    document.getElementById('iconFileSize').textContent = (file.size/1024).toFixed(1)+' KB';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeIcon() {
+  STATE.iconFile = null;
+  document.getElementById('iconPreviewArea').style.display = 'none';
+  document.getElementById('iconUploadLabel').style.display = 'flex';
+  document.getElementById('iconInput').value = '';
+}
+
+// ============================================================
+// PERMISSIONS
+// ============================================================
+function togglePermissions() {
+  STATE.permissionsExpanded = !STATE.permissionsExpanded;
+  updatePermUI();
+}
+
+function updatePermUI() {
+  const grid = document.getElementById('permGrid');
+  const actions = document.getElementById('permActions');
+  const arrow = document.getElementById('permArrow');
+  const toggleBtn = document.querySelector('.permissions-toggle span:first-of-type');
+
+  grid.classList.toggle('hidden', !STATE.permissionsExpanded);
+  actions.classList.toggle('hidden', !STATE.permissionsExpanded);
+  arrow.style.transform = STATE.permissionsExpanded ? 'rotate(180deg)' : '';
+
+  if (STATE.permissionsExpanded) {
+    renderPermGrid();
+  } else {
+    grid.innerHTML = '';
+  }
+
+  document.getElementById('permCount').textContent = STATE.permissions.length;
+
+  const hasDanger = STATE.permissions.some(p => {
+    for (const cat of PERMISSION_CATEGORIES) {
+      for (const perm of cat.permissions) {
+        if (perm.key === p && perm.dangerous) return true;
+      }
+    }
+    return false;
+  });
+  document.getElementById('permDangerNote').classList.toggle('hidden', !hasDanger);
+
+  // Update toggle text
+  const key = STATE.permissionsExpanded ? 'permissionsShowLess' : 'permissionsShowMore';
+  // Use the first span (the text one, not the count)
+  toggleBtn.textContent = getText(key);
+}
+
+function renderPermGrid() {
+  const grid = document.getElementById('permGrid');
+  grid.innerHTML = '';
+  PERMISSION_CATEGORIES.forEach(cat => {
+    const div = document.createElement('div');
+    div.className = 'permission-category';
+    div.innerHTML = `<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+      <div class="permission-cat-title">${STATE.lang === 'zh' ? cat.labelCn : cat.label}</div>
+      ${cat.permissions.map(p => `
+        <label class="permission-item" onclick="togglePerm('${p.key}')">
+          <input type="checkbox" ${STATE.permissions.includes(p.key) ? 'checked' : ''}>
+          <div>
+            <div class="permission-item-label">${STATE.lang === 'zh' ? p.labelCn : p.label}${p.dangerous ? ' <span style="color:rgba(255,153,0,0.8);font-size:10px;">▲</span>' : ''}</div>
+            <div class="permission-item-desc">${STATE.lang === 'zh' ? p.descCn : p.desc}</div>
+          </div>
+        </label>
+      `).join('')}`;
+    grid.appendChild(div);
+  });
+}
+
+function togglePerm(key) {
+  const idx = STATE.permissions.indexOf(key);
+  if (idx >= 0) STATE.permissions.splice(idx, 1);
+  else STATE.permissions.push(key);
+  updatePermUI();
+}
+
+function setDefaultPerms() {
+  STATE.permissions = [...DEFAULT_PERMS];
+  updatePermUI();
+}
+
+function selectAllPerms() {
+  STATE.permissions = [...ALL_PERM_KEYS];
+  updatePermUI();
+}
+
+function clearPerms() {
+  STATE.permissions = [];
+  updatePermUI();
+}
+
+// ============================================================
+// PWA TOGGLE
+// ============================================================
+function togglePwa() {
+  STATE.pwaEnabled = !STATE.pwaEnabled;
+  document.getElementById('pwaSwitch').classList.toggle('active', STATE.pwaEnabled);
+}
+
+// ============================================================
+// MODE SWITCHING
+// ============================================================
+function switchMode(mode) {
+  STATE.mode = mode;
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.mode === mode);
+  });
+
+  const fileArea = document.getElementById('fileUploadArea');
+  const pasteArea = document.getElementById('pasteCodeArea');
+  const uploadIcon = document.getElementById('uploadIcon');
+  const desc = document.getElementById('modeDesc');
+  const spec = document.getElementById('uploadSpec');
+
+  if (mode === 'html-paste') {
+    fileArea.classList.add('hidden');
+    pasteArea.classList.remove('hidden');
+    desc.dataset.i18n = 'formatInfoB';
+  } else {
+    fileArea.classList.remove('hidden');
+    pasteArea.classList.add('hidden');
+    uploadIcon.textContent = mode === 'zip' ? '📦' : '📄';
+    desc.dataset.i18n = mode === 'zip' ? 'formatInfoC' : 'formatInfoA';
+    spec.dataset.i18n = mode === 'zip' ? 'maxSizeLabel' : 'maxSizeLabelCode';
+  }
+
+  // ZIP-specific info boxes
+  document.getElementById('zipDetectBox').style.display = mode === 'zip' ? '' : 'none';
+  document.getElementById('zipLargeBox').style.display = mode === 'zip' ? '' : 'none';
+  document.getElementById('zipWarningBox').style.display = mode === 'zip' ? '' : 'none';
+
+  // Reset app name mode
+  if (mode === 'html-paste') {
+    STATE.appNameAuto = false;
+  } else {
+    STATE.appNameAuto = true;
+  }
+  updateAppNameUI();
+  applyI18n();
+  checkPasteSubmit();
+}
+
+// ============================================================
+// FILE UPLOAD
+// ============================================================
+let uploadFileName = null;
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  uploadFileName = file;
+  startUploadBuild(file);
+}
+
+// Drag and drop support
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+  document.getElementById('uploadText').textContent = getText('releaseToUpload');
+});
+dropZone.addEventListener('dragleave', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  document.getElementById('uploadText').dataset.i18n = STATE.mode === 'zip' ? 'formatInfoC' : 'initTransfer';
+  applyI18n();
+});
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    uploadFileName = file;
+    startUploadBuild(file);
+  }
+});
+
+function startUploadBuild(file) {
+  STATE.fileName = file.name;
+  STATE.sourceFileName = file.name;
+  const appName = STATE.appNameAuto ? file.name.replace(/\.[^.]+$/i, '') : (document.getElementById('customAppName').value || undefined);
+  const version = document.getElementById('appVersion').value || '1.0.0';
+  if (!/^\d+\.\d+\.\d+$/.test(version)) {
+    alert(getText('versionFormatError'));
+    return;
+  }
+  if (file.type === 'application/zip' || file.name.endsWith('.zip')) {
+    STATE.sourceContent = '[ZIP file: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)]';
+    startRealBuild(appName || file.name.replace(/\.zip$/i, ''), version, '', file.name, true);
+  } else {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      STATE.sourceContent = e.target.result;
+      startRealBuild(appName || file.name.replace(/\.[^.]+$/i, ''), version, e.target.result, file.name, false);
+    };
+    reader.readAsText(file);
+  }
+}
+
+// ============================================================
+// PASTE BUILD
+// ============================================================
+function checkPasteSubmit() {
+  const code = document.getElementById('codeTextarea').value;
+  const name = document.getElementById('customAppName').value;
+  const btn = document.getElementById('pasteSubmit');
+  const btnText = document.getElementById('pasteBtnText');
+  const charCount = document.getElementById('charCount');
+  charCount.textContent = getText('charCount').replace('{count}', code.length);
+  charCount.dataset.i18nVarCount = code.length;
+
+  // Detect code type
+  const badge = document.getElementById('codeTypeBadge');
+  const detectBox = document.getElementById('reactDetectBox');
+  if (code.trim()) {
+    const detection = detectCodeType(code);
+    if (detection.type === 'react-component' && detection.confidence >= 50) {
+      badge.textContent = '⚛️ React Component ✓';
+      badge.style.cssText = 'padding:2px 6px;font-size:10px;border:1px solid rgba(34,197,94,0.5);border-radius:2px;color:#22c55e;background:rgba(34,197,94,0.1);text-transform:uppercase;letter-spacing:.05em;';
+      detectBox.style.display = '';
+    } else if (detection.type === 'html-react') {
+      badge.textContent = '🌐 HTML+React';
+      badge.style.cssText = 'padding:2px 6px;font-size:10px;border:1px solid rgba(0,255,157,0.5);border-radius:2px;color:var(--bp-cyan);background:rgba(0,255,157,0.1);text-transform:uppercase;letter-spacing:.05em;';
+      detectBox.style.display = 'none';
+    } else if (detection.type === 'html') {
+      badge.textContent = '📄 HTML';
+      badge.style.cssText = 'padding:2px 6px;font-size:10px;border:1px solid rgba(0,240,255,0.5);border-radius:2px;color:var(--bp-blue);background:rgba(0,240,255,0.1);text-transform:uppercase;letter-spacing:.05em;';
+      detectBox.style.display = 'none';
+    } else {
+      badge.textContent = '📄 Code';
+      badge.style.cssText = 'padding:2px 6px;font-size:10px;border:1px solid rgba(92,124,138,0.5);border-radius:2px;color:var(--bp-dim);background:rgba(92,124,138,0.1);text-transform:uppercase;letter-spacing:.05em;';
+      detectBox.style.display = 'none';
+    }
+  } else {
+    badge.textContent = '';
+    detectBox.style.display = 'none';
+  }
+
+  if (code.trim() && name.trim()) {
+    btn.disabled = false;
+    btn.classList.add('active');
+    btnText.dataset.i18n = 'submitReady';
+  } else if (!name.trim()) {
+    btn.disabled = true;
+    btn.classList.remove('active');
+    btnText.dataset.i18n = 'enterAppName';
+  } else {
+    btn.disabled = true;
+    btn.classList.remove('active');
+    btnText.dataset.i18n = 'submitDisabled';
+  }
+  applyI18n();
+}
+
+function startPasteBuild() {
+  const code = document.getElementById('codeTextarea').value;
+  const name = document.getElementById('customAppName').value;
+  const version = document.getElementById('appVersion').value || '1.0.0';
+  if (!code.trim() || !name.trim()) return;
+  if (!/^\d+\.\d+\.\d+$/.test(version)) {
+    alert(getText('versionFormatError'));
+    return;
+  }
+  STATE.fileName = name + '.tsx';
+  STATE.sourceFileName = name + '.tsx';
+  STATE.sourceContent = code;
+  startRealBuild(name, version, code, name + '.tsx', false);
+}
+
+// Code type detection (simplified from the original)
+function detectCodeType(content) {
+  const trimmed = content.trim();
+  let htmlScore = 0, reactScore = 0, embeddedReactScore = 0;
+
+  if (/<!DOCTYPE\s+html/i.test(trimmed) || /<html[\s>]/i.test(trimmed)) htmlScore = 25;
+  if (/<script[^>]*type\s*=\s*["']text\/babel["']/i.test(trimmed) || /cdn\.tailwindcss\.com/i.test(trimmed)) embeddedReactScore = 20;
+  if (/^import\s+React/m.test(trimmed) || /^import\s+\{[^}]*\}\s+from\s+['"]react['"]/m.test(trimmed)) reactScore = 30;
+  if (/export\s+default\s+function\s+\w+/.test(trimmed) || /export\s+default\s+class\s+\w+/.test(trimmed)) reactScore += 25;
+  if (/<[A-Z][a-zA-Z0-9]*[\s/>]/.test(trimmed)) reactScore += 10;
+  if (/useState\s*\(/.test(trimmed) || /useEffect\s*\(/.test(trimmed)) reactScore += 10;
+
+  if (htmlScore >= 25 && embeddedReactScore >= 20) return { type: 'html-react', confidence: embeddedReactScore + 10 };
+  if (htmlScore >= 25) return { type: 'html', confidence: htmlScore };
+  if (reactScore >= 30) return { type: 'react-component', confidence: reactScore };
+  if (trimmed.includes('function') || trimmed.includes('const ') || trimmed.includes('let ') || trimmed.includes('import ')) return { type: 'js', confidence: 10 };
+  return { type: 'unknown', confidence: 0 };
+}
+
+function getText(key) {
+  const t = I18N[STATE.lang];
+  const text = resolveI18nKey(key, t);
+  return text !== undefined ? text : key;
+}
+
+// ============================================================
+// REAL BUILD via Backend API
+// ============================================================
+let buildTimer = null;
+let buildPollInterval = null;
+let eventSource = null;
+
+function startRealBuild(appName, version, codeContent, fileName, isZip) {
+  STATE.currentAppName = appName;
+  STATE.currentVersion = version;
+  addToBuildHistory(appName, 'queued');
+  showState('progress');
+  document.getElementById('taskFileName').textContent = appName;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+  const terminal = document.getElementById('terminalLogs');
+  terminal.innerHTML = '';
+
+  const requestBody = {
+    mode: isZip ? 'zip' : (STATE.mode === 'html-paste' ? 'paste' : 'html'),
+    appName: appName || 'App',
+    version: version || '1.0.0',
+    fileName: fileName || 'index.html',
+    code: codeContent || '',
+    permissions: STATE.permissions
+  };
+
+  function doSubmit() {
+    fetch('/api/build', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      showError(data.error);
+      return;
+    }
+    STATE.currentTaskId = data.taskId;
+    document.getElementById('taskIdDisplay').textContent = data.taskId;
+    document.getElementById('queueBanner').classList.add('hidden');
+
+    // Start SSE for real-time logs
+    startBuildSSE(data.taskId);
+    // Also start polling as fallback
+    startBuildPolling(data.taskId, appName, version);
+  })
+  .catch(err => {
+    showError('无法连接到构建服务器: ' + err.message);
+  });
+}
+
+  document.getElementById('progressStatusText').className = 'progress-status-text queued-text';
+  document.getElementById('progressStatusText').dataset.i18n = 'progressStatusProcessing';
+  applyI18n();
+  document.getElementById('queueBanner').classList.remove('hidden');
+
+  const iconFile = STATE.iconFile;
+  if (iconFile) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      requestBody.icon = e.target.result.split(',')[1];
+      doSubmit();
+    };
+    reader.readAsDataURL(iconFile);
+  } else {
+    doSubmit();
+  }
+}
+
+function startBuildSSE(taskId) {
+  if (eventSource) {
+    eventSource.close();
+  }
+  try {
+    eventSource = new EventSource('/api/build/' + taskId + '/stream');
+    eventSource.onmessage = function(e) {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === 'log') {
+          appendTerminalLog(data.text);
+        } else if (data.type === 'progress') {
+          updateProgressBar(data.value);
+        } else if (data.type === 'status') {
+          if (data.status === 'complete') {
+            finishBuild(taskId);
+          } else if (data.status === 'error') {
+            showError('构建失败', taskId);
+            updateHistoryStatus(taskId, 'failed');
+          }
+        }
+      } catch(e) {}
+    };
+    eventSource.onerror = function() {
+      // SSE will auto-reconnect, fallback to polling
+    };
+  } catch(e) {
+    // SSE not supported, fallback to polling only
+  }
+}
+
+function startBuildPolling(taskId, appName, version) {
+  if (buildPollInterval) {
+    clearInterval(buildPollInterval);
+  }
+  buildPollInterval = setInterval(function() {
+    fetch('/api/build/' + taskId + '/status')
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) return;
+        updateProgressBar(data.progress);
+        if (data.logs && data.logs.length > 0) {
+          const terminal = document.getElementById('terminalLogs');
+          const existingLines = terminal.querySelectorAll('.terminal-line').length;
+          data.logs.slice(Math.max(0, data.logs.length - 50)).forEach(function(log, idx) {
+            const existing = terminal.querySelectorAll('.terminal-line');
+            if (idx >= existing.length) {
+              appendTerminalLog(log);
+            }
+          });
+        }
+        if (data.status === 'complete') {
+          finishBuild(taskId);
+        } else if (data.status === 'error') {
+          showError(data.error || '构建失败', taskId);
+          updateHistoryStatus(taskId, 'failed');
+        }
+      })
+      .catch(function() {});
+  }, 1000);
+}
+
+function appendTerminalLog(text) {
+  const terminal = document.getElementById('terminalLogs');
+  const lineDiv = document.createElement('div');
+  lineDiv.className = 'terminal-line';
+  const lineNum = terminal.querySelectorAll('.terminal-line').length + 1;
+  let cssClass = '';
+  if (text.startsWith('[DONE]')) cssClass = 'success';
+  else if (text.startsWith('[ERROR]')) cssClass = 'error';
+  else if (text.startsWith('[WARN]')) cssClass = 'warn';
+  lineDiv.innerHTML = '<span class="num">' + String(lineNum).padStart(3, ' ') + '</span><span class="text ' + cssClass + '">' + escapeHtml(text) + '</span>';
+  terminal.insertBefore(lineDiv, document.getElementById('terminalCursor'));
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function updateProgressBar(pct) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function finishBuild(taskId) {
+  if (buildPollInterval) {
+    clearInterval(buildPollInterval);
+    buildPollInterval = null;
+  }
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
+  }
+  document.getElementById('progressStatusText').className = 'progress-status-text';
+  document.getElementById('progressStatusText').style.animation = 'none';
+  updateHistoryStatus(taskId, 'completed');
+  
+  // Check if APK is ready
+  fetch('/api/build/' + taskId + '/status')
+    .then(res => res.json())
+    .then(data => {
+      const outputName = STATE.currentAppName || document.getElementById('taskFileName').textContent || 'app';
+      const outputVersion = STATE.currentVersion || '1.0.0';
+      showState('complete');
+      updateCompleteState(outputName, outputVersion);
+    })
+    .catch(function() {
+      const outputName = STATE.currentAppName || document.getElementById('taskFileName').textContent || 'app';
+      showState('complete');
+      updateCompleteState(outputName, '1.0.0');
+    });
+}
+
+// ============================================================
+// COMPLETE STATE
+// ============================================================
+function updateCompleteState(appName, version) {
+  const customName = document.getElementById('customAppName').value.trim();
+  const displayName = customName || appName || 'app';
+  document.getElementById('completeFileName').textContent = displayName.replace(/\.(html|zip|json)$/i, '') + '.apk';
+  document.getElementById('completeTaskId').textContent = STATE.currentTaskId;
+
+  const now = new Date();
+  const expiryDate = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  document.getElementById('expiryDate').textContent = expiryDate.toLocaleString(undefined, {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+  });
+
+  const text = getText('expiryFuture').replace('{hours}', '2').replace('{minutes}', '0');
+  document.getElementById('expiryHelper').textContent = text;
+
+  // Share URL
+  document.getElementById('shareUrl').value = window.location.origin + '/downloads/' + STATE.currentTaskId + '.apk';
+}
+
+function downloadApk() {
+  const apkName = document.getElementById('completeFileName').textContent || 'app.apk';
+  const taskId = STATE.currentTaskId;
+  if (!taskId) return;
+
+  const downloadUrl = '/downloads/' + taskId + '.apk';
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = apkName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function downloadBuildLog() {
+  const taskId = STATE.currentTaskId;
+  if (!taskId) return;
+  const appName = document.getElementById('completeFileName').textContent || 'app';
+  const downloadUrl = '/downloads/' + taskId + '.log';
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = appName.replace(/\.apk$/i, '') + '_build.log';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareUrl');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  try {
+    navigator.clipboard.writeText(input.value);
+    const btn = document.getElementById('copyBtn');
+    const text = document.getElementById('copyBtnText');
+    btn.classList.add('copied');
+    text.dataset.i18n = 'linkCopied';
+    applyI18n();
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      text.dataset.i18n = 'copyLink';
+      applyI18n();
+    }, 3000);
+  } catch(e) {
+    // Fallback
+    document.execCommand('copy');
+  }
+}
+
+// ============================================================
+// STATE MANAGEMENT
+// ============================================================
+function showState(state) {
+  document.getElementById('idleState').classList.add('hidden');
+  document.getElementById('progressState').classList.add('hidden');
+  document.getElementById('completeState').classList.add('hidden');
+  document.getElementById('errorState').classList.add('hidden');
+
+  if (state === 'idle') {
+    document.getElementById('idleState').classList.remove('hidden');
+  } else if (state === 'progress') {
+    document.getElementById('progressState').classList.remove('hidden');
+  } else if (state === 'complete') {
+    document.getElementById('completeState').classList.remove('hidden');
+  } else if (state === 'error') {
+    document.getElementById('errorState').classList.remove('hidden');
+  }
+}
+
+function resetAll() {
+  if (buildTimer) {
+    clearTimeout(buildTimer);
+    buildTimer = null;
+  }
+  if (buildPollInterval) {
+    clearInterval(buildPollInterval);
+    buildPollInterval = null;
+  }
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
+  }
+  showState('idle');
+  STATE.currentTaskId = null;
+  STATE.fileName = null;
+}
+
+function showError(message, taskId) {
+  showState('error');
+  document.getElementById('errorMessage').textContent = message;
+  if (taskId) {
+    document.getElementById('errorTaskIdBox').style.display = '';
+    document.getElementById('errorTaskId').textContent = taskId;
+  }
+}
+
+// ============================================================
+// BUILD HISTORY
+// ============================================================
+function toggleHistory() {
+  STATE.historyExpanded = !STATE.historyExpanded;
+  document.getElementById('historyContent').classList.toggle('open', STATE.historyExpanded);
+  document.getElementById('historyArrow').style.transform = STATE.historyExpanded ? 'rotate(180deg)' : '';
+}
+
+function addToBuildHistory(name, status) {
+  const entry = {
+    id: STATE.currentTaskId || 'D2A-' + Math.random().toString(36).substring(2,8).toUpperCase(),
+    name: name,
+    status: status,
+    timestamp: Date.now(),
+  };
+  STATE.buildHistory.unshift(entry);
+  if (STATE.buildHistory.length > 10) STATE.buildHistory.pop();
+  renderHistory();
+}
+
+function updateHistoryStatus(taskId, status) {
+  const entry = STATE.buildHistory.find(h => h.id === taskId);
+  if (entry) {
+    entry.status = status;
+    renderHistory();
+  }
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const count = document.getElementById('historyCount');
+  count.textContent = STATE.buildHistory.length;
+
+  if (STATE.buildHistory.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = STATE.buildHistory.map(h => {
+    const timeStr = formatHistoryTime(h.timestamp);
+    const statusIcon = getStatusIcon(h.status);
+    return `
+      <div class="history-item">
+        <div class="history-item-left">
+          <div class="history-status-icon ${h.status}">${statusIcon}</div>
+          <div class="history-item-info">
+            <div class="history-item-name">${h.name}</div>
+            <div class="history-item-meta">
+              <span>${h.id}</span>
+              <span>·</span>
+              <span>${timeStr}</span>
+              <span>·</span>
+              <span>${getText('history' + h.status.charAt(0).toUpperCase() + h.status.slice(1))}</span>
+            </div>
+          </div>
+        </div>
+        <div class="history-item-actions">
+          <button class="history-action download" onclick="event.stopPropagation(); showCompleteFromHistory('${h.id}')" title="${getText('downloadBtn')}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          </button>
+          <button class="history-action remove" onclick="event.stopPropagation(); removeHistoryItem('${h.id}')" title="Remove">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showCompleteFromHistory(taskId) {
+  const entry = STATE.buildHistory.find(h => h.id === taskId);
+  if (!entry) return;
+  STATE.currentTaskId = taskId;
+  STATE.fileName = entry.name;
+  showState('complete');
+  updateCompleteState(entry.name, '1.0.0');
+}
+
+function removeHistoryItem(id) {
+  STATE.buildHistory = STATE.buildHistory.filter(h => h.id !== id);
+  renderHistory();
+}
+
+function clearHistory() {
+  STATE.buildHistory = [];
+  renderHistory();
+}
+
+function formatHistoryTime(timestamp) {
+  const diff = Date.now() - timestamp;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return getText('historyJustNow');
+  if (mins < 60) return getText('historyMinsAgo').replace('{mins}', mins);
+  if (hours < 24) return getText('historyHoursAgo').replace('{hours}', hours);
+  return getText('historyDaysAgo').replace('{days}', days);
+}
+
+function getStatusIcon(status) {
+  switch(status) {
+    case 'completed': return '✓';
+    case 'failed': return '✗';
+    case 'building': return '⟳';
+    case 'queued': return '⏳';
+    case 'expired': return '⌛';
+    default: return '○';
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(function init() {
+  // Restore language
+  const savedLang = localStorage.getItem('demo2apk-lang');
+  if (savedLang && I18N[savedLang]) {
+    STATE.lang = savedLang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === savedLang));
+  }
+  applyI18n();
+})();
+</script>
+</body>
+</html>
