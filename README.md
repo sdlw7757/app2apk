@@ -11,15 +11,6 @@
   <img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License" />
 </p>
 
-## Star History
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=sdlw7757/app2apk&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=sdlw7757/app2apk&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=sdlw7757/app2apk&type=Date" width="80%" />
-  </picture>
-</p>
 
 ---
 
