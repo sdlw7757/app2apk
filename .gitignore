@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+*.apk
+
+# Build artifacts
+output/
+offline/
+builds/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Gradle cache (for Android builds)
+.gradle/
+
+# Large build tools (download separately)
+tools/jdk/
+tools/gradle-8.9/
+tools/android-sdk/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
