@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, sys, json, zipfile, io, shutil, uuid, time, threading, webbrowser, re, subprocess, urllib.request, tarfile, tempfile, html as htmlmod, base64, struct, ssl
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs, quote
 
 APP2APK_VERSION = "2.3.0"
 if getattr(sys, 'frozen', False):
@@ -626,7 +626,15 @@ class App2ApkHandler(BaseHTTPRequestHandler):
             filename = download_filename if download_filename else os.path.basename(filepath)
             if not filename.endswith(".apk"):
                 filename += ".apk"
-            self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+            ascii_name = filename.encode("ascii", "ignore").decode("ascii").replace('"', "").replace("\\", "").strip()
+            if not ascii_name:
+                ascii_name = os.path.basename(filepath)
+            quoted = quote(filename, safe="")
+            self.send_header("Content-Disposition", f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quoted}")
+        try:
+            self.send_header("Content-Length", str(os.path.getsize(filepath)))
+        except OSError:
+            pass
         self.end_headers()
         with open(filepath, "rb") as f:
             shutil.copyfileobj(f, self.wfile)
@@ -639,6 +647,7 @@ class App2ApkHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
+        log(f"GET {path} from {self.client_address}")
 
         if path == "/":
             self._send_file(os.path.join(BASE_DIR, "index.html"))
@@ -672,23 +681,32 @@ class App2ApkHandler(BaseHTTPRequestHandler):
             self._set_cors()
             self.end_headers()
             last_logs = 0
-            while True:
-                with build_logs_lock:
-                    if task_id in build_tasks:
-                        t = build_tasks[task_id]
-                        new_logs = t["logs"][last_logs:]
-                        if new_logs:
-                            for line in new_logs:
-                                self.wfile.write(f"data: {json.dumps({'type': 'log', 'text': line})}\n\n".encode())
-                            last_logs = len(t["logs"])
-                        self.wfile.write(f"data: {json.dumps({'type': 'progress', 'value': t['progress']})}\n\n".encode())
-                        if t["status"] in ("complete", "error"):
-                            self.wfile.write(f"data: {json.dumps({'type': 'status', 'status': t['status'], 'taskId': task_id})}\n\n".encode())
-                            self.wfile.flush()
-                            break
-                self.wfile.write(b": heartbeat\n\n")
-                self.wfile.flush()
-                time.sleep(0.5)
+            unknown_ticks = 0
+            try:
+                while True:
+                    with build_logs_lock:
+                        if task_id in build_tasks:
+                            unknown_ticks = 0
+                            t = build_tasks[task_id]
+                            new_logs = t["logs"][last_logs:]
+                            if new_logs:
+                                for line in new_logs:
+                                    self.wfile.write(f"data: {json.dumps({'type': 'log', 'text': line})}\n\n".encode())
+                                last_logs = len(t["logs"])
+                            self.wfile.write(f"data: {json.dumps({'type': 'progress', 'value': t['progress']})}\n\n".encode())
+                            if t["status"] in ("complete", "error"):
+                                self.wfile.write(f"data: {json.dumps({'type': 'status', 'status': t['status'], 'taskId': task_id})}\n\n".encode())
+                                self.wfile.flush()
+                                break
+                        else:
+                            unknown_ticks += 1
+                            if unknown_ticks > 40:  # 任务不存在约20秒后结束流
+                                break
+                    self.wfile.write(b": heartbeat\n\n")
+                    self.wfile.flush()
+                    time.sleep(0.5)
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                pass  # 客户端断开连接, 正常结束 SSE 流
         elif path.startswith("/downloads/"):
             parts = path.split("/")
             filename = parts[2]
@@ -756,10 +774,29 @@ class App2ApkHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
+def _open_browser(url):
+    """打开默认浏览器 (绝不阻塞服务器).
+    Windows 下用分离子进程 rundll32, Popen 立即返回; 失败仅记录日志.
+    """
+    try:
+        time.sleep(1.0)  # 等服务器就绪
+        if os.name == "nt":
+            flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+            subprocess.Popen(
+                ["rundll32", "url.dll,FileProtocolHandler", url],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL, close_fds=True, creationflags=flags
+            )
+        else:
+            webbrowser.open(url)
+    except Exception as e:
+        log(f"Could not open browser automatically: {e} (请手动访问 {url})")
+
 def main():
     ensure_dir(BUILDS_DIR)
-    port = 8080
-    server = HTTPServer(("0.0.0.0", port), App2ApkHandler)
+    port = int(os.environ.get("APP2APK_PORT") or (sys.argv[1] if len(sys.argv) > 1 else 8090))
+    # ThreadingHTTPServer: 每个连接独立线程, SSE 长连接不再阻塞下载/状态查询
+    server = ThreadingHTTPServer(("0.0.0.0", port), App2ApkHandler)
     print(f"""
   ╔══════════════════════════════════════════╗
   ║          APP2APK Build Server            ║
@@ -772,7 +809,8 @@ def main():
 
   Open your browser to start building!
     """)
-    webbrowser.open(f"http://localhost:{port}")
+    # 后台线程自动打开浏览器; 分离子进程方式, 即使失败也不影响服务器
+    threading.Thread(target=_open_browser, args=(f"http://localhost:{port}",), daemon=True).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

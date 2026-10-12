@@ -32,10 +32,6 @@ pnpm-debug.log*
 # Test coverage
 coverage/
 
-# Python cache
-__pycache__/
-*.py[cod]
-
 # Gradle cache (for Android builds)
 .gradle/
 
@@ -48,4 +44,8 @@ tools/android-sdk/
 tmp/
 temp/
 *.tmp
+
+# Python
+__pycache__/
+*.pyc
 

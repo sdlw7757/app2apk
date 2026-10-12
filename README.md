@@ -143,9 +143,9 @@ cd demo2apk
 
 | 接口 | 地址 | 说明 |
 |------|------|------|
-| Web 管理界面 | http://localhost:8080 | 可视化构建 APK |
-| 工具状态接口 | http://localhost:8080/api/tools/status | 查看工具链状态 |
-| 构建 API | http://localhost:8080/api/build | 提交构建任务 |
+| Web 管理界面 | http://localhost:8090 | 可视化构建 APK |
+| 工具状态接口 | http://localhost:8090/api/tools/status | 查看工具链状态 |
+| 构建 API | http://localhost:8090/api/build | 提交构建任务 |
 
 ---
 
@@ -379,5 +379,5 @@ SOFTWARE.
 
 <p align="center">
   用 ❤️ 与 AI 打造 &nbsp;|&nbsp; 
-  <a href="http://localhost:8080">立即构建你的第一个 APK</a>
+  <a href="http://localhost:8090">立即构建你的第一个 APK</a>
 </p>
